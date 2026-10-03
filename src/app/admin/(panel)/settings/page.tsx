@@ -48,7 +48,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         <div className="card">
           <h2>Subscriptions</h2>
           <div className="row">
-            <div className="field"><label htmlFor="subscriptionDiscountPercent">Subscriber discount (%)</label><input id="subscriptionDiscountPercent" name="subscriptionDiscountPercent" type="number" min={0} max={90} defaultValue={s.subscriptionDiscountPercent} /></div>
+            <div className="field"><label htmlFor="subscriptionDiscountPercent">Default subscriber discount (%) <span className="field-hint">Each product can set its own in Products.</span></label><input id="subscriptionDiscountPercent" name="subscriptionDiscountPercent" type="number" min={0} max={90} defaultValue={s.subscriptionDiscountPercent} /></div>
           </div>
           <fieldset className="option-group">
             <legend>Schedules customers can choose</legend>

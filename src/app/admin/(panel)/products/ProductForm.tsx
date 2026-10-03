@@ -1,7 +1,15 @@
 import type { Product } from "@/db/schema";
+import { centsToInput } from "@/lib/money";
 import { saveProduct } from "../../actions/products";
 
-export function ProductForm({ product }: { product?: Product }) {
+export function ProductForm({ product, defaultDiscountPercent }: { product?: Product; defaultDiscountPercent?: number }) {
+  const discountType = product?.subscriptionDiscountType ?? "default";
+  const discountValue =
+    product?.subscriptionDiscountValue == null
+      ? ""
+      : discountType === "amount"
+        ? centsToInput(product.subscriptionDiscountValue)
+        : String(product.subscriptionDiscountValue);
   return (
     <form action={saveProduct} className="admin-form card" style={{ maxWidth: 900 }}>
       {product ? <input type="hidden" name="id" value={product.id} /> : null}
@@ -82,6 +90,26 @@ export function ProductForm({ product }: { product?: Product }) {
       <label className="check">
         <input type="checkbox" name="subscriptionEnabled" defaultChecked={product?.subscriptionEnabled ?? true} /> Offer as a subscription
       </label>
+      <div className="row">
+        <div className="field">
+          <label htmlFor="subscriptionDiscountType">
+            Subscriber discount <span className="field-hint">Applies to every size and grind of this product.</span>
+          </label>
+          <select id="subscriptionDiscountType" name="subscriptionDiscountType" defaultValue={discountType}>
+            <option value="default">
+              Store default{defaultDiscountPercent != null ? ` (${defaultDiscountPercent}% off)` : ""}
+            </option>
+            <option value="percent">Percent off</option>
+            <option value="amount">Dollar amount off each item</option>
+          </select>
+        </div>
+        <div className="field">
+          <label htmlFor="subscriptionDiscountValue">
+            Amount <span className="field-hint">e.g. 15 for 15%, or 3.00 for $3 off. Ignored for store default.</span>
+          </label>
+          <input id="subscriptionDiscountValue" name="subscriptionDiscountValue" inputMode="decimal" defaultValue={discountValue} placeholder="15 or 3.00" />
+        </div>
+      </div>
       <label className="check">
         <input type="checkbox" name="featured" defaultChecked={product?.featured ?? false} /> Feature on the home page
       </label>

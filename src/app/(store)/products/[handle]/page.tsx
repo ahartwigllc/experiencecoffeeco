@@ -6,7 +6,7 @@ import { FlavorScale, TastingCard } from "@/components/brand/TastingCard";
 import { getStoreProduct } from "@/lib/catalog";
 import { priceRange, splitNotes } from "@/lib/catalog-utils";
 import { siteUrl } from "@/lib/env";
-import { isInterval } from "@/lib/pricing";
+import { isInterval, resolveSubscriptionDiscount } from "@/lib/pricing";
 import { getSettings } from "@/lib/settings";
 
 type Params = { params: Promise<{ handle: string }>; searchParams: Promise<{ subscribe?: string }> };
@@ -87,7 +87,7 @@ export default async function ProductPage({ params, searchParams }: Params) {
               inventory: v.inventory,
               active: v.active,
             }))}
-            discountPercent={settings.subscriptionDiscountPercent}
+            discount={resolveSubscriptionDiscount(p, settings.subscriptionDiscountPercent)}
             intervals={settings.subscriptionIntervals}
             defaultPurchase={subscribe ? "sub" : "once"}
             defaultInterval={isInterval(subscribe) ? subscribe : undefined}

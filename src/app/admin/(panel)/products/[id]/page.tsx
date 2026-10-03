@@ -6,7 +6,7 @@ import { Flash } from "@/components/admin/Flash";
 import { db, schema } from "@/db/client";
 import { requireOwner } from "@/lib/auth";
 import { centsToInput, formatCents, percent } from "@/lib/money";
-import { subscriptionUnitPrice } from "@/lib/pricing";
+import { applySubscriptionDiscount, resolveSubscriptionDiscount, subscriptionDiscountLabel } from "@/lib/pricing";
 import { getSettings } from "@/lib/settings";
 import { addVariants, removeVariant, saveVariants } from "../../../actions/products";
 import { ProductForm } from "../ProductForm";
@@ -21,6 +21,11 @@ export default async function EditProductPage({ params, searchParams }: { params
   });
   if (!product) notFound();
   const settings = await getSettings();
+  const discount = resolveSubscriptionDiscount(product, settings.subscriptionDiscountPercent);
+  const saveLabel = subscriptionDiscountLabel(discount).replace(/^Save /, "");
+  const discountText =
+    (saveLabel ? `${saveLabel} off${discount.kind === "amount" ? " each item" : ""}` : "no discount") +
+    (product.subscriptionDiscountType === "default" ? " (store default)" : "");
 
   return (
     <>
@@ -43,7 +48,7 @@ export default async function EditProductPage({ params, searchParams }: { params
         <h2>Sizes, grinds, prices, and costs</h2>
         <p className="small muted">
           Unit cost is what one bag or box costs you to make: green coffee, roast loss, bag, label. It drives every profit number.
-          Subscription price is {settings.subscriptionDiscountPercent}% off.
+          Subscription price: {discountText}. Change it under Subscriber discount below.
         </p>
         {product.variants.length > 0 ? (
           <form action={saveVariants}>
@@ -67,7 +72,7 @@ export default async function EditProductPage({ params, searchParams }: { params
                 </thead>
                 <tbody>
                   {product.variants.map((v) => {
-                    const sub = subscriptionUnitPrice(v.priceCents, settings.subscriptionDiscountPercent);
+                    const sub = applySubscriptionDiscount(v.priceCents, discount);
                     const m = v.unitCostCents !== null && v.priceCents > 0 ? (v.priceCents - v.unitCostCents) / v.priceCents : null;
                     const sm = v.unitCostCents !== null && sub > 0 ? (sub - v.unitCostCents) / sub : null;
                     return (
@@ -171,7 +176,7 @@ export default async function EditProductPage({ params, searchParams }: { params
       </div>
 
       <h2>Details</h2>
-      <ProductForm product={product} />
+      <ProductForm product={product} defaultDiscountPercent={settings.subscriptionDiscountPercent} />
     </>
   );
 }

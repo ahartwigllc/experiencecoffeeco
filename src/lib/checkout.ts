@@ -7,7 +7,15 @@ import { inStock, variantLabel } from "./catalog-utils";
 import { getCustomerEmail } from "./customer-auth";
 import { siteUrl } from "./env";
 import { formatCents } from "./money";
-import { INTERVALS, isDeliveryZip, normalizeZip, subscriptionUnitPrice, validateCartShape, type Interval } from "./pricing";
+import {
+  INTERVALS,
+  applySubscriptionDiscount,
+  isDeliveryZip,
+  normalizeZip,
+  resolveSubscriptionDiscount,
+  validateCartShape,
+  type Interval,
+} from "./pricing";
 import { getSettings } from "./settings";
 import { stripe } from "./stripe";
 
@@ -78,7 +86,9 @@ export async function createCheckoutSession(input: CheckoutInput): Promise<strin
       if (!settings.subscriptionIntervals.includes(l.interval))
         throw new CheckoutError("That delivery schedule isn't offered right now. Pick another schedule in your cart.");
     }
-    const unit = l.interval ? subscriptionUnitPrice(r.variant.priceCents, settings.subscriptionDiscountPercent) : r.variant.priceCents;
+    const unit = l.interval
+      ? applySubscriptionDiscount(r.variant.priceCents, resolveSubscriptionDiscount(r.product, settings.subscriptionDiscountPercent))
+      : r.variant.priceCents;
     subtotal += unit * l.quantity;
     lineItems.push({
       quantity: l.quantity,

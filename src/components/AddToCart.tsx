@@ -4,19 +4,19 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { inStock, uniqueValues, variantLabel, type VariantLike } from "@/lib/catalog-utils";
 import { formatCents } from "@/lib/money";
-import { INTERVALS, subscriptionUnitPrice, type Interval } from "@/lib/pricing";
+import { INTERVALS, applySubscriptionDiscount, subscriptionDiscountLabel, type Interval, type SubscriptionDiscount } from "@/lib/pricing";
 import { useCart } from "./CartProvider";
 
 type Props = {
   product: { id: number; title: string; handle: string; image?: string; subscriptionEnabled: boolean };
   variants: VariantLike[];
-  discountPercent: number;
+  discount: SubscriptionDiscount;
   intervals: Interval[];
   defaultPurchase?: "once" | "sub";
   defaultInterval?: Interval;
 };
 
-export function AddToCart({ product, variants, discountPercent, intervals, defaultPurchase = "once", defaultInterval }: Props) {
+export function AddToCart({ product, variants, discount, intervals, defaultPurchase = "once", defaultInterval }: Props) {
   const cart = useCart();
   const sizes = uniqueValues(variants.map((v) => v.size));
   const grinds = uniqueValues(variants.map((v) => v.grind));
@@ -39,7 +39,8 @@ export function AddToCart({ product, variants, discountPercent, intervals, defau
 
   const available = variant ? inStock(variant, qty) : false;
   const onePrice = variant?.priceCents ?? 0;
-  const subPrice = subscriptionUnitPrice(onePrice, discountPercent);
+  const subPrice = applySubscriptionDiscount(onePrice, discount);
+  const saveLabel = subscriptionDiscountLabel(discount);
 
   function grindAvailable(g: string) {
     return variants.some((v) => v.grind === g && (sizes.length ? v.size === size : true) && inStock(v));
@@ -103,7 +104,7 @@ export function AddToCart({ product, variants, discountPercent, intervals, defau
           <label className="purchase-option">
             <input type="radio" name="purchase" checked={purchase === "sub"} onChange={() => setPurchase("sub")} />
             <span>
-              <strong>Subscribe</strong> <span className="save-tag">Save {discountPercent}%</span>
+              <strong>Subscribe</strong> {saveLabel ? <span className="save-tag">{saveLabel}</span> : null}
               <br />
               <span className="stock-note">Skip, pause, or cancel any time.</span>
             </span>

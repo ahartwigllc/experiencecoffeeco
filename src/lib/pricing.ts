@@ -41,6 +41,49 @@ export function subscriptionUnitPrice(priceCents: number, discountPercent: numbe
   return Math.round((priceCents * (100 - pct)) / 100);
 }
 
+/**
+ * Per-product subscription discount, set in Admin > Products.
+ *  - "default": use the store-wide percentage from Admin > Settings
+ *  - "percent": this product's own percentage off (0–90)
+ *  - "amount":  a fixed number of cents off each unit
+ * The subscription price never drops below 10% of the one-time price or 50¢ (Stripe's minimum).
+ */
+export type SubscriptionDiscountType = "default" | "percent" | "amount";
+export type SubscriptionDiscount = { kind: "percent"; percent: number } | { kind: "amount"; cents: number };
+
+export const SUBSCRIPTION_DISCOUNT_TYPES: SubscriptionDiscountType[] = ["default", "percent", "amount"];
+
+export function isSubscriptionDiscountType(v: unknown): v is SubscriptionDiscountType {
+  return typeof v === "string" && (SUBSCRIPTION_DISCOUNT_TYPES as string[]).includes(v);
+}
+
+export function resolveSubscriptionDiscount(
+  product: { subscriptionDiscountType?: string | null; subscriptionDiscountValue?: number | null },
+  defaultPercent: number,
+): SubscriptionDiscount {
+  const value = product.subscriptionDiscountValue;
+  if (product.subscriptionDiscountType === "percent" && value != null) return { kind: "percent", percent: clampPercent(value) };
+  if (product.subscriptionDiscountType === "amount" && value != null) return { kind: "amount", cents: Math.max(0, Math.round(value)) };
+  return { kind: "percent", percent: clampPercent(defaultPercent) };
+}
+
+function clampPercent(p: number): number {
+  return Math.min(Math.max(Math.round(p), 0), 90);
+}
+
+/** Unit price for a subscriber, given the one-time price and the product's discount. */
+export function applySubscriptionDiscount(priceCents: number, discount: SubscriptionDiscount): number {
+  if (discount.kind === "percent") return subscriptionUnitPrice(priceCents, discount.percent);
+  const floor = Math.min(priceCents, Math.max(50, Math.ceil(priceCents * 0.1)));
+  return Math.max(priceCents - discount.cents, floor);
+}
+
+/** Short label for the storefront, e.g. "Save 20%" or "Save $3.00". Empty when there is no discount. */
+export function subscriptionDiscountLabel(discount: SubscriptionDiscount): string {
+  if (discount.kind === "percent") return discount.percent > 0 ? `Save ${discount.percent}%` : "";
+  return discount.cents > 0 ? `Save $${(discount.cents / 100).toFixed(2)}` : "";
+}
+
 export type CartLineInput = { variantId: number; quantity: number; interval: Interval | null };
 
 export const CART_LIMITS = { maxLines: 30, maxQuantity: 50 };

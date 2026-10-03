@@ -6,6 +6,7 @@ import { db, schema } from "@/db/client";
 import { requireOwner } from "@/lib/auth";
 import { flash } from "@/lib/flash";
 import { parseDollarsToCents } from "@/lib/money";
+import { isSubscriptionDiscountType, type SubscriptionDiscountType } from "@/lib/pricing";
 
 export async function slugify(s: string): Promise<string> {
   return s
@@ -20,6 +21,23 @@ export async function slugify(s: string): Promise<string> {
 function str(f: FormData, k: string): string | null {
   const v = String(f.get(k) ?? "").trim();
   return v || null;
+}
+
+/** Reads the per-product subscriber discount fields. Percent is stored as 0–90, dollar amounts as cents. */
+function parseSubscriptionDiscount(formData: FormData, id: number | null): { subscriptionDiscountType: SubscriptionDiscountType; subscriptionDiscountValue: number | null } {
+  const back = id ? `/admin/products/${id}` : "/admin/products/new";
+  const rawType = formData.get("subscriptionDiscountType");
+  const type: SubscriptionDiscountType = isSubscriptionDiscountType(rawType) ? rawType : "default";
+  if (type === "default") return { subscriptionDiscountType: "default", subscriptionDiscountValue: null };
+  const raw = String(formData.get("subscriptionDiscountValue") ?? "").trim().replace(/[%$\s]/g, "");
+  if (type === "percent") {
+    const pct = Number(raw);
+    if (raw === "" || !Number.isFinite(pct) || pct < 0 || pct > 90) flash(back, "error", "Enter a subscriber discount between 0 and 90 percent.");
+    return { subscriptionDiscountType: "percent", subscriptionDiscountValue: Math.round(pct) };
+  }
+  const cents = parseDollarsToCents(raw);
+  if (cents === null || cents < 0) flash(back, "error", "Enter the subscriber discount as a dollar amount, like 3.00.");
+  return { subscriptionDiscountType: "amount", subscriptionDiscountValue: cents };
 }
 
 export async function saveProduct(formData: FormData) {
@@ -47,6 +65,7 @@ export async function saveProduct(formData: FormData) {
     images,
     taxCode: str(formData, "taxCode"),
     subscriptionEnabled: formData.get("subscriptionEnabled") === "on",
+    ...parseSubscriptionDiscount(formData, id),
     featured: formData.get("featured") === "on",
     sortOrder: Number(formData.get("sortOrder")) || 0,
     updatedAt: new Date(),

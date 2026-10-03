@@ -70,6 +70,9 @@ export const products = pgTable("products", {
   /** Stripe Tax product tax code, only used when settings.taxMode = "stripe_tax". */
   taxCode: text("tax_code"),
   subscriptionEnabled: boolean("subscription_enabled").notNull().default(true),
+  /** default = store-wide % from Settings; percent = own % (0–90); amount = cents off each unit. */
+  subscriptionDiscountType: text("subscription_discount_type").notNull().default("default"),
+  subscriptionDiscountValue: integer("subscription_discount_value"),
   featured: boolean("featured").notNull().default(false),
   sortOrder: integer("sort_order").notNull().default(0),
   shopifyId: text("shopify_id").unique(),

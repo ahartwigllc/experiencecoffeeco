@@ -64,3 +64,47 @@ test("MRR normalization", () => {
   assert.equal(monthlyValueCents(2000, 1, "2week"), Math.round((2000 * 26) / 12));
   assert.equal(monthlyValueCents(2000, 1, "week"), Math.round((2000 * 52) / 12));
 });
+
+import {
+  applySubscriptionDiscount,
+  resolveSubscriptionDiscount,
+  subscriptionDiscountLabel,
+} from "../src/lib/pricing";
+
+test("products without their own discount use the store default", () => {
+  const d = resolveSubscriptionDiscount({ subscriptionDiscountType: "default", subscriptionDiscountValue: null }, 20);
+  assert.deepEqual(d, { kind: "percent", percent: 20 });
+  assert.equal(applySubscriptionDiscount(2500, d), 2000);
+  assert.equal(subscriptionDiscountLabel(d), "Save 20%");
+});
+
+test("a product can set its own percentage", () => {
+  const d = resolveSubscriptionDiscount({ subscriptionDiscountType: "percent", subscriptionDiscountValue: 15 }, 20);
+  assert.equal(applySubscriptionDiscount(2100, d), 1785);
+  assert.equal(subscriptionDiscountLabel(d), "Save 15%");
+});
+
+test("a product can take a fixed dollar amount off each unit", () => {
+  const d = resolveSubscriptionDiscount({ subscriptionDiscountType: "amount", subscriptionDiscountValue: 300 }, 20);
+  assert.equal(applySubscriptionDiscount(2500, d), 2200);
+  assert.equal(subscriptionDiscountLabel(d), "Save $3.00");
+});
+
+test("a fixed discount never takes the price below 10% or 50 cents", () => {
+  const d = { kind: "amount" as const, cents: 10_000 };
+  assert.equal(applySubscriptionDiscount(2500, d), 250);
+  assert.equal(applySubscriptionDiscount(300, d), 50);
+  assert.equal(applySubscriptionDiscount(40, d), 40);
+});
+
+test("a type without a value falls back to the store default", () => {
+  assert.deepEqual(resolveSubscriptionDiscount({ subscriptionDiscountType: "amount", subscriptionDiscountValue: null }, 20), {
+    kind: "percent",
+    percent: 20,
+  });
+});
+
+test("zero discount shows no savings label", () => {
+  assert.equal(subscriptionDiscountLabel({ kind: "percent", percent: 0 }), "");
+  assert.equal(subscriptionDiscountLabel({ kind: "amount", cents: 0 }), "");
+});

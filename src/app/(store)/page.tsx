@@ -7,7 +7,7 @@ import { FlavorScale, TastingCard } from "@/components/brand/TastingCard";
 import { listStoreProducts, type CatalogProduct } from "@/lib/catalog";
 import { priceRange, splitNotes } from "@/lib/catalog-utils";
 import { formatCents } from "@/lib/money";
-import { subscriptionUnitPrice } from "@/lib/pricing";
+import { applySubscriptionDiscount, resolveSubscriptionDiscount, subscriptionDiscountLabel } from "@/lib/pricing";
 import { getSettings } from "@/lib/settings";
 
 function pickFeatured(products: CatalogProduct[]) {
@@ -20,6 +20,19 @@ function pickFeatured(products: CatalogProduct[]) {
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+/** One savings line for the whole store: "Save 20%" when every product matches, "Save up to 25%" when percentages differ. */
+function storeSavings(products: CatalogProduct[], defaultPercent: number): { short: string; headline: string } {
+  const discounts = products.filter((p) => p.subscriptionEnabled).map((p) => resolveSubscriptionDiscount(p, defaultPercent));
+  const labels = [...new Set(discounts.map(subscriptionDiscountLabel).filter(Boolean))];
+  if (labels.length === 1) return { short: labels[0]!, headline: `${labels[0]} on every subscription.` };
+  const pcts = discounts.flatMap((d) => (d.kind === "percent" && d.percent > 0 ? [d.percent] : []));
+  if (pcts.length && pcts.length === discounts.length) {
+    const max = Math.max(...pcts);
+    return { short: `Save up to ${max}%`, headline: `Save up to ${max}% on every subscription.` };
+  }
+  return { short: "Subscribe & save", headline: "Subscribers save on every delivery." };
+}
+
 export default async function HomePage() {
   const [products, settings] = await Promise.all([listStoreProducts(), getSettings()]);
   const featured = pickFeatured(products);
@@ -28,6 +41,7 @@ export default async function HomePage() {
   const featuredPrice = featured ? priceRange(featured.variants)?.min : undefined;
   const featuredSizes = featured ? [...new Set(featured.variants.map((v) => v.size).filter(Boolean))].join(" / ") : "";
   const coldBrewPrice = coldBrew?.variants[0]?.priceCents;
+  const savings = storeSavings(products, settings.subscriptionDiscountPercent);
 
   return (
     <>
@@ -44,7 +58,7 @@ export default async function HomePage() {
               Shop coffee
             </Link>
             <Link className="btn btn-ghost" href="/#subscribe">
-              Subscribe &amp; save {settings.subscriptionDiscountPercent}%
+              {savings.short.startsWith("Save") ? `Subscribe & ${savings.short.charAt(0).toLowerCase()}${savings.short.slice(1)}` : savings.short}
             </Link>
           </div>
         </div>
@@ -149,8 +163,10 @@ export default async function HomePage() {
               <div className="prose" dangerouslySetInnerHTML={{ __html: coldBrew.descriptionHtml }} />
               <p>
                 A 67oz box with a spout.{" "}
-                {coldBrewPrice
-                  ? `${formatCents(coldBrewPrice)}, or ${formatCents(subscriptionUnitPrice(coldBrewPrice, settings.subscriptionDiscountPercent))} on a subscription.`
+                {coldBrewPrice && coldBrew
+                  ? `${formatCents(coldBrewPrice)}, or ${formatCents(
+                      applySubscriptionDiscount(coldBrewPrice, resolveSubscriptionDiscount(coldBrew, settings.subscriptionDiscountPercent)),
+                    )} on a subscription.`
                   : ""}
               </p>
               <Link className="btn btn-gold" href={`/products/${coldBrew.handle}`}>
@@ -166,7 +182,7 @@ export default async function HomePage() {
           <div className="subscribe-band">
             <div>
               <p className="eyebrow">Subscriptions</p>
-              <p className="big">Save {settings.subscriptionDiscountPercent}% on every bag.</p>
+              <p className="big">{savings.headline}</p>
             </div>
             <div>
               <p>
