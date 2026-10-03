@@ -35,7 +35,7 @@ type LineLike = {
   quantity: number | null;
   amount: number; // line total before order-level discounts
   unitAmount: number | null;
-  description: string | null;
+  description: string | null | undefined;
   price: Stripe.Price | null;
 };
 

@@ -35,7 +35,7 @@ export async function insertOrder(values: Omit<NewOrder, "number">): Promise<{ i
         .values({
           ...values,
           number: sql`(select coalesce(max(${schema.orders.number}), 1000) + 1 from ${schema.orders})`,
-        } as NewOrder)
+        } as unknown as NewOrder)
         .returning({ id: schema.orders.id });
       return { id: row!.id, created: true };
     } catch (err) {
@@ -61,7 +61,7 @@ export async function insertOrderItems(orderId: number, items: NewOrderItem[]): 
 }
 
 /** Decrements stock for tracked variants. Stock may go negative; admin flags it. */
-export async function decrementInventory(items: { variantId: number | null | undefined; quantity: number }[]): Promise<void> {
+export async function decrementInventory(items: { variantId?: number | null; quantity: number }[]): Promise<void> {
   for (const i of items) {
     if (!i.variantId) continue;
     await db()
