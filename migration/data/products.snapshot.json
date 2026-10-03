@@ -1,0 +1,833 @@
+{
+ "exportedAt": "2026-10-02T00:00:00Z",
+ "source": "Snapshot taken during the site audit via the Shopify connector. Contains catalog only, no personal data.",
+ "products": [
+  {
+   "id": "gid://shopify/Product/8392843657261",
+   "handle": "cold-brew-box-64oz",
+   "title": "Cold Brew Box (67oz)",
+   "status": "ACTIVE",
+   "createdAt": "2026-02-09T22:49:43Z",
+   "tags": [],
+   "productType": "",
+   "options": [
+    {
+     "name": "Title"
+    }
+   ],
+   "descriptionHtml": "<p>Our signature Experience Cold Brew sourced directly from your refrigerator. This cold brew is brewed using freshly roasted beans from Guatemala that have been processed via anaerobic ferment. Expect a strong flavor, but with bright and vibrant fruity notes.</p>",
+   "variants": {
+    "nodes": [
+     {
+      "id": "gid://shopify/ProductVariant/44592740892717",
+      "title": "Default Title",
+      "sku": null,
+      "price": "25.00",
+      "position": 1,
+      "inventoryQuantity": -55,
+      "inventoryItem": {
+       "tracked": false,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Title",
+        "value": "Default Title"
+       }
+      ]
+     }
+    ]
+   },
+   "media": {
+    "nodes": [
+     {
+      "image": {
+       "url": "https://cdn.shopify.com/s/files/1/0736/6003/9213/files/rn-image_picker_lib_temp_fff9c0f2-c12b-4773-8541-ac7d9d8c1836.png?v=1779897076",
+       "altText": ""
+      }
+     },
+     {
+      "image": {
+       "url": "https://cdn.shopify.com/s/files/1/0736/6003/9213/files/LeftSide_2.png?v=1771270284",
+       "altText": ""
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "gid://shopify/Product/8392846999597",
+   "handle": "guatemalan-anaerobic-8oz",
+   "title": "Guatemalan Anaerobic Coffee",
+   "status": "ARCHIVED",
+   "createdAt": "2026-02-09T23:05:47Z",
+   "tags": [],
+   "productType": "",
+   "options": [
+    {
+     "name": "Size"
+    },
+    {
+     "name": "Grind size"
+    }
+   ],
+   "descriptionHtml": "<p><em>This is a great \"Daily Driver\" coffee. Unoffensive, clean, bright. This is what we use for our signature cold brew, and also enjoy the notes in espresso.</em></p>\n<p><em>Clean and bright coffee with a delightfully dry finish and no fermented flavors. We also noted lemon meringue, peach, cane syrup and just a dash of coriander.</em></p>",
+   "variants": {
+    "nodes": [
+     {
+      "id": "gid://shopify/ProductVariant/66768685400109",
+      "title": "12oz / Whole Bean",
+      "sku": null,
+      "price": "16.00",
+      "position": 1,
+      "inventoryQuantity": 0,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Whole Bean"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/66768685432877",
+      "title": "12oz / Coarse",
+      "sku": null,
+      "price": "16.00",
+      "position": 2,
+      "inventoryQuantity": 0,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Coarse"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/66768685465645",
+      "title": "12oz / Medium",
+      "sku": null,
+      "price": "16.00",
+      "position": 3,
+      "inventoryQuantity": 0,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Medium"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/66768685498413",
+      "title": "12oz / Fine",
+      "sku": null,
+      "price": "16.00",
+      "position": 4,
+      "inventoryQuantity": 0,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Fine"
+       }
+      ]
+     }
+    ]
+   },
+   "media": {
+    "nodes": [
+     {
+      "image": {
+       "url": "https://cdn.shopify.com/s/files/1/0736/6003/9213/files/Gemini_Generated_Image_18ifyo18ifyo18if.png?v=1779894605",
+       "altText": ""
+      }
+     },
+     {
+      "image": {
+       "url": "https://cdn.shopify.com/s/files/1/0736/6003/9213/files/Gemini_Generated_Image_7r6rn7r6rn7r6rn7.png?v=1779894629",
+       "altText": ""
+      }
+     },
+     {
+      "image": {
+       "url": "https://cdn.shopify.com/s/files/1/0736/6003/9213/files/4.png?v=1771207662",
+       "altText": ""
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "gid://shopify/Product/8392848080941",
+   "handle": "ethiopian-wush-wush-8oz",
+   "title": "Specialty Lot: Ethiopian Wush Wush (Anaerobic Natural)",
+   "status": "ACTIVE",
+   "createdAt": "2026-02-09T23:12:43Z",
+   "tags": [],
+   "productType": "",
+   "options": [
+    {
+     "name": "Size"
+    },
+    {
+     "name": "Grind size"
+    }
+   ],
+   "descriptionHtml": "<p>Ethiopia Yirgacheffe Wush Wush 96 Hour Anaerobic Natural. This coffee is definitely an experience. It is very different than other coffees due to the long fermentation process. It is not your typical flavor profile, which we find perfect for a pour over.</p>\n<p><b><em>Flavor Notes</em>:</b><span> </span>Strawberry, banana, blackberry, lemonade and sugar cane</p>\n<p><b><em>Process</em>:</b><span> </span>Natural (dry) processed after 96 hours of anaerobic fermentation</p>",
+   "variants": {
+    "nodes": [
+     {
+      "id": "gid://shopify/ProductVariant/66768694804525",
+      "title": "12oz / Whole Bean",
+      "sku": null,
+      "price": "21.00",
+      "position": 1,
+      "inventoryQuantity": 3,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Whole Bean"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/66768675438637",
+      "title": "12oz / Coarse",
+      "sku": null,
+      "price": "21.00",
+      "position": 2,
+      "inventoryQuantity": 0,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Coarse"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/66768675504173",
+      "title": "12oz / Medium",
+      "sku": null,
+      "price": "21.00",
+      "position": 3,
+      "inventoryQuantity": -1,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Medium"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/66768675373101",
+      "title": "12oz / Fine",
+      "sku": null,
+      "price": "21.00",
+      "position": 4,
+      "inventoryQuantity": 0,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Fine"
+       }
+      ]
+     }
+    ]
+   },
+   "media": {
+    "nodes": [
+     {
+      "image": {
+       "url": "https://cdn.shopify.com/s/files/1/0736/6003/9213/files/Gemini_Generated_Image_n701ezn701ezn701.png?v=1781884554",
+       "altText": ""
+      }
+     },
+     {
+      "image": {
+       "url": "https://cdn.shopify.com/s/files/1/0736/6003/9213/files/Gemini_Generated_Image_slq7vtslq7vtslq7.png?v=1781884657",
+       "altText": ""
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "gid://shopify/Product/15139779379245",
+   "handle": "ethiopian-guji-natural-process",
+   "title": "Ethiopian Guji (Natural Process)",
+   "status": "ACTIVE",
+   "createdAt": "2026-06-18T02:04:06Z",
+   "tags": [],
+   "productType": "",
+   "options": [
+    {
+     "name": "Size"
+    },
+    {
+     "name": "Grind size"
+    }
+   ],
+   "descriptionHtml": "<p><em style=\"font-size: 0.875rem;\">Our Natural Ethiopian Guji is a light, sweet, and fruity bean that we consider our new daily driver. It's our house favorite for espresso, and also what we use for our cold brew. </em></p>\n<p><em><strong>Flavor Notes</strong>: Herbal tea, dried lemon, and tropical fruit</em></p>\n<p><em><strong>Process</strong>: Natural</em></p>\n<p><em><strong>Cupping score</strong>: 85</em></p>\n<p> </p>",
+   "variants": {
+    "nodes": [
+     {
+      "id": "gid://shopify/ProductVariant/66878785880109",
+      "title": "12oz / Whole Bean",
+      "sku": null,
+      "price": "16.00",
+      "position": 1,
+      "inventoryQuantity": 96,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Whole Bean"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/66878785912877",
+      "title": "12oz / Coarse",
+      "sku": null,
+      "price": "16.00",
+      "position": 2,
+      "inventoryQuantity": 100,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Coarse"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/66878785945645",
+      "title": "12oz / Medium",
+      "sku": null,
+      "price": "16.00",
+      "position": 3,
+      "inventoryQuantity": 100,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Medium"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/66878785978413",
+      "title": "12oz / Fine",
+      "sku": null,
+      "price": "16.00",
+      "position": 4,
+      "inventoryQuantity": 99,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Fine"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/67114272456749",
+      "title": "2lb / Whole Bean",
+      "sku": null,
+      "price": "32.00",
+      "position": 5,
+      "inventoryQuantity": 7,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "2lb"
+       },
+       {
+        "name": "Grind size",
+        "value": "Whole Bean"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/67114272489517",
+      "title": "2lb / Coarse",
+      "sku": null,
+      "price": "32.00",
+      "position": 6,
+      "inventoryQuantity": 10,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "2lb"
+       },
+       {
+        "name": "Grind size",
+        "value": "Coarse"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/67114272522285",
+      "title": "2lb / Medium",
+      "sku": null,
+      "price": "32.00",
+      "position": 7,
+      "inventoryQuantity": 10,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "2lb"
+       },
+       {
+        "name": "Grind size",
+        "value": "Medium"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/67114272555053",
+      "title": "2lb / Fine",
+      "sku": null,
+      "price": "32.00",
+      "position": 8,
+      "inventoryQuantity": 10,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "2lb"
+       },
+       {
+        "name": "Grind size",
+        "value": "Fine"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/67114272587821",
+      "title": "5lb / Whole Bean",
+      "sku": null,
+      "price": "60.00",
+      "position": 9,
+      "inventoryQuantity": 5,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "5lb"
+       },
+       {
+        "name": "Grind size",
+        "value": "Whole Bean"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/67114272620589",
+      "title": "5lb / Coarse",
+      "sku": null,
+      "price": "60.00",
+      "position": 10,
+      "inventoryQuantity": 5,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "5lb"
+       },
+       {
+        "name": "Grind size",
+        "value": "Coarse"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/67114272653357",
+      "title": "5lb / Medium",
+      "sku": null,
+      "price": "60.00",
+      "position": 11,
+      "inventoryQuantity": 5,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "5lb"
+       },
+       {
+        "name": "Grind size",
+        "value": "Medium"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/67114272686125",
+      "title": "5lb / Fine",
+      "sku": null,
+      "price": "60.00",
+      "position": 12,
+      "inventoryQuantity": 5,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "5lb"
+       },
+       {
+        "name": "Grind size",
+        "value": "Fine"
+       }
+      ]
+     }
+    ]
+   },
+   "media": {
+    "nodes": [
+     {
+      "image": {
+       "url": "https://cdn.shopify.com/s/files/1/0736/6003/9213/files/Gemini_Generated_Image_18ifyo18ifyo18if.png?v=1779894605",
+       "altText": ""
+      }
+     },
+     {
+      "image": {
+       "url": "https://cdn.shopify.com/s/files/1/0736/6003/9213/files/Gemini_Generated_Image_7r6rn7r6rn7r6rn7.png?v=1779894629",
+       "altText": ""
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "gid://shopify/Product/15144986214445",
+   "handle": "peru-specialty-lot",
+   "title": "Specialty Lot: Peru (Natural Process)",
+   "status": "ACTIVE",
+   "createdAt": "2026-06-19T15:33:39Z",
+   "tags": [],
+   "productType": "",
+   "options": [
+    {
+     "name": "Size"
+    },
+    {
+     "name": "Grind size"
+    }
+   ],
+   "descriptionHtml": "<p>This Peru specialty lot is from <span>Agua Colorada - Telesforo, which is a farm hiding away in the Peruvian Andes mountains. This coffee has proved itself to be our favorite coffee yet. It is fruit forward and very sweet. We would recommend this coffee as a pour-over or aeropress, but we have enjoyed it as espresso as well.</span></p>\n<p><b><em><strong>Flavor </strong>Notes</em>:</b><span> Strawberry wine, lime, gummy candy</span></p>\n<p><em><strong>Process</strong>: Natural</em></p>\n<p><em><strong>Cupping score</strong>: 87.5</em></p>",
+   "variants": {
+    "nodes": [
+     {
+      "id": "gid://shopify/ProductVariant/66889527787565",
+      "title": "12oz / Whole Bean",
+      "sku": null,
+      "price": "21.00",
+      "position": 1,
+      "inventoryQuantity": 198,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Whole Bean"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/66889527820333",
+      "title": "12oz / Coarse",
+      "sku": null,
+      "price": "21.00",
+      "position": 2,
+      "inventoryQuantity": 200,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Coarse"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/66889527853101",
+      "title": "12oz / Medium",
+      "sku": null,
+      "price": "21.00",
+      "position": 3,
+      "inventoryQuantity": 200,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Medium"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/66889527885869",
+      "title": "12oz / Fine",
+      "sku": null,
+      "price": "21.00",
+      "position": 4,
+      "inventoryQuantity": 200,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "12oz"
+       },
+       {
+        "name": "Grind size",
+        "value": "Fine"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/67114276192301",
+      "title": "2lb / Whole Bean",
+      "sku": null,
+      "price": "40.00",
+      "position": 5,
+      "inventoryQuantity": 100,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "2lb"
+       },
+       {
+        "name": "Grind size",
+        "value": "Whole Bean"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/67114276225069",
+      "title": "2lb / Coarse",
+      "sku": null,
+      "price": "40.00",
+      "position": 6,
+      "inventoryQuantity": 100,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "2lb"
+       },
+       {
+        "name": "Grind size",
+        "value": "Coarse"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/67114276257837",
+      "title": "2lb / Medium",
+      "sku": null,
+      "price": "40.00",
+      "position": 7,
+      "inventoryQuantity": 100,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "2lb"
+       },
+       {
+        "name": "Grind size",
+        "value": "Medium"
+       }
+      ]
+     },
+     {
+      "id": "gid://shopify/ProductVariant/67114276290605",
+      "title": "2lb / Fine",
+      "sku": null,
+      "price": "40.00",
+      "position": 8,
+      "inventoryQuantity": 100,
+      "inventoryItem": {
+       "tracked": true,
+       "unitCost": null
+      },
+      "selectedOptions": [
+       {
+        "name": "Size",
+        "value": "2lb"
+       },
+       {
+        "name": "Grind size",
+        "value": "Fine"
+       }
+      ]
+     }
+    ]
+   },
+   "media": {
+    "nodes": [
+     {
+      "image": {
+       "url": "https://cdn.shopify.com/s/files/1/0736/6003/9213/files/Gemini_Generated_Image_n701ezn701ezn701.png?v=1781884554",
+       "altText": ""
+      }
+     },
+     {
+      "image": {
+       "url": "https://cdn.shopify.com/s/files/1/0736/6003/9213/files/Gemini_Generated_Image_slq7vtslq7vtslq7.png?v=1781884657",
+       "altText": ""
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

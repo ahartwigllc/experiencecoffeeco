@@ -1,0 +1,23 @@
+{
+  // Cloudflare Workers deployment (via @opennextjs/cloudflare).
+  // Secrets (STRIPE_SECRET_KEY, DATABASE_URL, etc.) are NOT stored here.
+  // Add them with:  npx wrangler secret put STRIPE_SECRET_KEY
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "experience-coffee",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-06-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": { "enabled": true },
+  "vars": {
+    "SITE_URL": "https://experiencecoffee.co",
+    "EMAIL_FROM": "Experience Coffee <hello@experiencecoffee.co>",
+    "APP_TIMEZONE": "America/New_York"
+  }
+  // After the first deploy, attach the domain in the Cloudflare dashboard:
+  // Workers & Pages > experience-coffee > Settings > Domains & Routes
+  // "routes": [{ "pattern": "experiencecoffee.co", "custom_domain": true }]
+}

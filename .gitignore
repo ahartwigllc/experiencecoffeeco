@@ -1,0 +1,18 @@
+node_modules
+.next
+.open-next
+.wrangler
+out
+dist
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
+.dev.vars
+.DS_Store
+npm-debug.log*
+
+# Customer data exported from Shopify contains personal information.
+# Never commit it, even to a private repo.
+migration/data/*.json
+!migration/data/products.snapshot.json

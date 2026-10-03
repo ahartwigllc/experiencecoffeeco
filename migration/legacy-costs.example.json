@@ -1,0 +1,5 @@
+{
+  "_comment": "Optional. Copy to migration/legacy-costs.json and fill in what one unit cost you, in cents. Applies to imported Shopify order items that have no matching product option (the early 8oz bags), so historical profit isn't overstated.",
+  "Guatemalan Anaerobic (8oz)": 450,
+  "Ethiopian Wush Wush (8oz)": 650
+}
