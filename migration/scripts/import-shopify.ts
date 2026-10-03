@@ -131,7 +131,7 @@ async function importCustomers(list: SCustomer[]) {
       shopifyId: c.id,
       createdAt: new Date(c.createdAt),
     };
-    let row = (await db.insert(schema.customers).values(values).onConflictDoNothing().returning({ id: schema.customers.id }))[0];
+    let row: { id: number } | undefined = (await db.insert(schema.customers).values(values).onConflictDoNothing().returning({ id: schema.customers.id }))[0];
     if (row) created++;
     if (!row && email) {
       // Same email already exists (e.g. they ordered on the new site first): link the Shopify id.
