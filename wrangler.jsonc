@@ -13,7 +13,7 @@
   },
   "observability": { "enabled": true },
   "vars": {
-    "SITE_URL": "https://experiencecoffee.co",
+    "SITE_URL": "https://experience-coffee.ahartwigllc.workers.dev",
     "EMAIL_FROM": "Experience Coffee <hello@experiencecoffee.co>",
     "APP_TIMEZONE": "America/New_York"
   }
