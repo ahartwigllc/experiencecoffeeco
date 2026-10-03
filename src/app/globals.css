@@ -2069,3 +2069,8 @@ textarea:focus {
   mask-image: radial-gradient(ellipse 42% 60% at center, transparent 45%, #000 90%);
   pointer-events: none;
 }
+
+/* Keep anchor targets (e.g. /#subscribe) clear of the sticky header. */
+html {
+  scroll-padding-top: 88px;
+}
