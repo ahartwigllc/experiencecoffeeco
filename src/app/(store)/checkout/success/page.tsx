@@ -5,6 +5,7 @@ import { ClearCart } from "@/components/CartLink";
 import { db, schema } from "@/db/client";
 import { getSettings } from "@/lib/settings";
 import { stripe } from "@/lib/stripe";
+import { handleCheckoutCompleted } from "@/lib/stripe-sync";
 
 export const metadata: Metadata = { title: "Thank you", robots: { index: false } };
 
@@ -20,7 +21,19 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
       const s = await stripe().checkout.sessions.retrieve(session_id);
       email = s.customer_details?.email ?? null;
       method = s.metadata?.fulfillment ?? null;
-      const o = await db().query.orders.findFirst({ where: eq(schema.orders.stripeCheckoutSessionId, session_id) });
+      const find = () => db().query.orders.findFirst({ where: eq(schema.orders.stripeCheckoutSessionId, session_id) });
+      let o = await find();
+      // Safety net: if the webhook hasn't landed yet (delay, outage, misconfigured secret), record the
+      // order now. handleCheckoutCompleted re-reads the session from Stripe, skips unpaid sessions, and
+      // is idempotent, so the webhook arriving later does nothing twice.
+      if (!o && s.status === "complete" && s.payment_status !== "unpaid") {
+        try {
+          await handleCheckoutCompleted(session_id);
+          o = await find();
+        } catch (err) {
+          console.error("Success page could not record order", session_id, err);
+        }
+      }
       orderNumber = o?.number ?? null;
     } catch {
       /* show generic thanks */
