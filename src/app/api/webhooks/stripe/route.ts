@@ -10,6 +10,9 @@ import { handleChargeRefunded, handleCheckoutCompleted, handleInvoicePaid, upser
  * checkout.session.completed, checkout.session.async_payment_succeeded, invoice.paid,
  * customer.subscription.created, customer.subscription.updated, customer.subscription.deleted,
  * customer.subscription.paused, customer.subscription.resumed, charge.refunded
+ *
+ * Every handler re-reads the object from the API (pinned to 2024-06-20 in lib/stripe.ts),
+ * so the endpoint can use any API version Stripe offers.
  */
 export async function POST(req: Request) {
   const signature = req.headers.get("stripe-signature");
@@ -48,7 +51,8 @@ export async function POST(req: Request) {
         await upsertSubscription(event.data.object.id);
         break;
       case "charge.refunded":
-        await handleChargeRefunded(event.data.object);
+        // Re-fetch with the pinned API version so the webhook endpoint's own version doesn't matter.
+        await handleChargeRefunded(await stripe().charges.retrieve(event.data.object.id));
         break;
       default:
         break;
