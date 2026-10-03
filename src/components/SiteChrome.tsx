@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { Settings } from "@/lib/settings";
 import { CartLink } from "./CartLink";
 import { NewsletterForm } from "./NewsletterForm";
+import { Wordmark } from "./brand/Wordmark";
+import { Branch } from "./brand/Botanical";
 
 export function SiteHeader({ settings }: { settings: Settings }) {
   return (
@@ -12,8 +14,8 @@ export function SiteHeader({ settings }: { settings: Settings }) {
       {settings.announcement ? <div className="announcement">{settings.announcement}</div> : null}
       <header className="site-header">
         <div className="wrap">
-          <Link href="/" className="wordmark">
-            Experience Coffee
+          <Link href="/" className="wordmark" aria-label="Experience Coffee, home">
+            <Wordmark size="sm" />
           </Link>
           <nav className="site-nav" aria-label="Main">
             <Link href="/shop">Shop</Link>
@@ -32,7 +34,12 @@ export function SiteFooter({ settings }: { settings: Settings }) {
   const year = new Date().getFullYear();
   return (
     <footer className="site-footer">
+      <Branch className="footer-branch" />
       <div className="wrap">
+        <div className="footer-brand">
+          <Wordmark size="md" tone="cream" />
+          <p>Specialty coffee, roasted light in Lyndhurst, New Jersey.</p>
+        </div>
         <div className="footer-grid">
           <div className="footer-newsletter">
             <h2>New lots, first</h2>

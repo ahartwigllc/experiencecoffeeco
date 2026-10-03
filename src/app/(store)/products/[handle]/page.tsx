@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/AddToCart";
 import { ProductGallery } from "@/components/ProductGallery";
+import { FlavorScale, TastingCard } from "@/components/brand/TastingCard";
 import { getStoreProduct } from "@/lib/catalog";
 import { priceRange, splitNotes } from "@/lib/catalog-utils";
 import { siteUrl } from "@/lib/env";
@@ -33,6 +34,7 @@ export default async function ProductPage({ params, searchParams }: Params) {
   if (!p) notFound();
   const notes = splitNotes(p.flavorNotes);
   const range = priceRange(p.variants);
+  const sizes = [...new Set(p.variants.map((v) => v.size).filter(Boolean))].join(" / ");
   const anyInStock = p.variants.some((v) => !v.trackInventory || v.inventory > 0);
 
   const jsonLd = {
@@ -60,32 +62,19 @@ export default async function ProductPage({ params, searchParams }: Params) {
       <div className="product">
         <ProductGallery images={p.images} title={p.title} />
         <div>
+          <p className="eyebrow">{p.kind === "cold_brew" ? "Cold brew" : p.origin ? `Single origin · ${p.origin}` : "Coffee"}</p>
           <h1 className="product-title">{p.title}</h1>
           {notes.length ? (
             <p className="product-notes">{notes.map((n) => n.charAt(0).toUpperCase() + n.slice(1)).join(". ")}.</p>
           ) : null}
-          {(p.origin || p.process || p.cuppingScore) && (
-            <dl className="facts">
-              {p.origin ? (
-                <>
-                  <dt>Origin</dt>
-                  <dd>{p.origin}</dd>
-                </>
-              ) : null}
-              {p.process ? (
-                <>
-                  <dt>Process</dt>
-                  <dd>{p.process}</dd>
-                </>
-              ) : null}
-              {p.cuppingScore ? (
-                <>
-                  <dt>Cupping score</dt>
-                  <dd>{p.cuppingScore}</dd>
-                </>
-              ) : null}
-            </dl>
-          )}
+          <TastingCard
+            notes={p.flavorNotes}
+            origin={p.origin}
+            process={p.process}
+            footer={sizes ? `Whole bean or ground · ${sizes}` : null}
+            score={p.cuppingScore}
+          />
+          <FlavorScale process={p.process} title={p.title} />
           <AddToCart
             product={{ id: p.id, title: p.title, handle: p.handle, image: p.images[0], subscriptionEnabled: p.subscriptionEnabled }}
             variants={p.variants.map((v) => ({

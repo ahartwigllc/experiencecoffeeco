@@ -9,6 +9,7 @@ export default async function ShopPage() {
   return (
     <div className="wrap">
       <div className="page-head">
+        <p className="eyebrow">The menu</p>
         <h1>Coffee</h1>
         <p className="lede">Every bag is roasted to order in small batches. Whole bean, or ground for your brewer.</p>
       </div>
