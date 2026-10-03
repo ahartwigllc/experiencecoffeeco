@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Experience Coffee",
     url: SITE,
-    images: ["/images/og.png"],
+    images: ["/img/brand/bag-wordmark.webp"],
   },
   twitter: { card: "summary_large_image" },
 };

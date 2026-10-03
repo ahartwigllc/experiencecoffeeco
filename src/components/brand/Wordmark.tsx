@@ -1,32 +1,29 @@
+/* eslint-disable @next/next/no-img-element */
 /**
- * The Experience Coffee wordmark, set in type so it stays crisp at any size:
- * "Experience" in a high-contrast serif with the x in tan, "COFFEE" tracked out underneath.
- * Matches the Canva "Logo Work" lockup.
+ * The Experience Coffee logo, exported from Canva ("Logo Work"):
+ * "Experience" with the tan x and tracked COFFEE underneath.
+ * `tone="cream"` is the same artwork recolored for dark backgrounds.
  */
-export function Wordmark({ size = "md", tone = "ink", as: Tag = "span" }: { size?: "sm" | "md" | "lg" | "xl"; tone?: "ink" | "cream"; as?: "span" | "div" | "h1" }) {
+export function Wordmark({
+  size = "md",
+  tone = "ink",
+  as: Tag = "span",
+  priority = false,
+}: {
+  size?: "sm" | "md" | "lg" | "xl";
+  tone?: "ink" | "cream";
+  as?: "span" | "div" | "h1";
+  priority?: boolean;
+}) {
+  const src = tone === "cream" ? "/img/brand/logo-cream.png" : "/img/brand/logo.png";
   return (
-    <Tag className={`wm wm-${size} wm-${tone}`} aria-label="Experience Coffee">
-      <span className="wm-word" aria-hidden="true">
-        E<span className="wm-x">x</span>perience
-      </span>
-      <span className="wm-sub" aria-hidden="true">
-        Coffee
-      </span>
+    <Tag className={`wm wm-${size}`}>
+      <img src={src} alt="Experience Coffee" width={951} height={199} fetchPriority={priority ? "high" : undefined} decoding="async" />
     </Tag>
   );
 }
 
-/** The stand-alone X monogram with "coffee" arcing around its top right, from the bag front. */
+/** The X monogram with COFFEE arcing over it, from the bag front. */
 export function Monogram({ className = "" }: { className?: string }) {
-  return (
-    <svg className={`monogram ${className}`} viewBox="0 0 120 120" role="img" aria-label="Experience Coffee">
-      <defs>
-        <path id="mono-arc" d="M 62 40 A 30 30 0 0 1 104 70" />
-      </defs>
-      <text className="monogram-x" x="14" y="112">X</text>
-      <text className="monogram-arc">
-        <textPath href="#mono-arc">COFFEE</textPath>
-      </text>
-    </svg>
-  );
+  return <img className={`monogram ${className}`} src="/img/brand/monogram.png" alt="Experience Coffee" width={445} height={466} />;
 }

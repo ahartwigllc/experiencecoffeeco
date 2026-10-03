@@ -34,7 +34,7 @@ export function SiteFooter({ settings }: { settings: Settings }) {
   const year = new Date().getFullYear();
   return (
     <footer className="site-footer">
-      <Branch className="footer-branch" />
+      <Branch name="c" className="footer-branch" />
       <div className="wrap">
         <div className="footer-brand">
           <Wordmark size="md" tone="cream" />

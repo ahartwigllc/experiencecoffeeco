@@ -1942,3 +1942,130 @@ textarea:focus {
     letter-spacing: 0.14em;
   }
 }
+
+/* ---- Canva artwork (logo + botanicals as image files) */
+.wm {
+  display: inline-block;
+  line-height: 0;
+}
+.wm img {
+  display: block;
+  height: auto;
+  width: 100%;
+}
+.wm-sm { width: 150px; }
+.wm-md { width: 230px; }
+.wm-lg { width: clamp(240px, 40vw, 420px); }
+.wm-xl { width: min(760px, 86vw); }
+.cover .wm {
+  margin: 0.5rem 0 1.75rem;
+}
+.monogram {
+  height: auto;
+}
+
+.botanical,
+.bean {
+  height: auto;
+  max-width: none;
+}
+.botanical-field .botanical {
+  width: clamp(170px, 26vw, 360px);
+  opacity: 0.75;
+}
+.botanical-field .bean {
+  width: clamp(48px, 6vw, 90px);
+  opacity: 0.7;
+}
+.bf-1 { left: -3%; top: -6%; transform: rotate(-8deg); }
+.bf-2 { right: -4%; top: 4%; transform: scaleX(-1) rotate(-10deg); }
+.bf-3 { right: 4%; bottom: -14%; transform: rotate(12deg); }
+.bb-1 { left: 8%; bottom: 10%; }
+.bb-2 { left: 26%; top: 10%; transform: rotate(-18deg); }
+.bb-3 { right: 26%; top: 70%; transform: rotate(24deg); }
+.botanical-soft .botanical,
+.botanical-soft .bean {
+  opacity: 0.35;
+}
+.why {
+  background-color: var(--cream-deep);
+  background-image: url("/img/brand/botanicals-pattern.png");
+  background-size: min(1100px, 140%);
+  background-position: center;
+}
+.why .botanical-field {
+  display: none;
+}
+.footer-branch {
+  width: 300px;
+  right: -60px;
+  bottom: -60px;
+  opacity: 0.3;
+  transform: rotate(-10deg);
+}
+.noir-branch {
+  width: clamp(240px, 32vw, 440px);
+  right: -60px;
+  top: -40px;
+  opacity: 0.8;
+}
+
+/* ---- bag gallery */
+.bags {
+  padding-top: 3rem;
+}
+.bag-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+}
+.bag-grid img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-m);
+  background: #fff;
+  box-shadow: 0 24px 50px -38px rgba(51, 37, 30, 0.6);
+}
+.bag-caption {
+  text-align: center;
+  margin-top: 1.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@media (max-width: 860px) {
+  .botanical-field .botanical {
+    width: 160px;
+    opacity: 0.5;
+  }
+  .bb-2,
+  .bb-3 {
+    display: none;
+  }
+  .bag-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .bag-grid img:last-child {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cover .wm {
+    animation: pour 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}
+.why {
+  background-image: none;
+}
+.why::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/img/brand/botanicals-pattern.png") center / min(1100px, 140%);
+  -webkit-mask-image: radial-gradient(ellipse 42% 60% at center, transparent 45%, #000 90%);
+  mask-image: radial-gradient(ellipse 42% 60% at center, transparent 45%, #000 90%);
+  pointer-events: none;
+}

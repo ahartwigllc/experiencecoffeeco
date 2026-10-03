@@ -16,3 +16,8 @@ npm-debug.log*
 # Never commit it, even to a private repo.
 migration/data/*.json
 !migration/data/products.snapshot.json
+
+# Original brand exports from Canva (large; web-ready copies live in public/img/brand)
+/brand-source/
+# Files the Claude desktop app drops into this folder
+/Claude outputs/

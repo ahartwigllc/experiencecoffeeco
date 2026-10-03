@@ -35,7 +35,7 @@ export default async function HomePage() {
         <BotanicalField variant="hero" />
         <div className="wrap cover-inner">
           <p className="eyebrow">Specialty coffee &amp; roastery · Lyndhurst, NJ</p>
-          <Wordmark size="xl" as="h1" />
+          <Wordmark size="xl" as="h1" priority />
           <p className="cover-lede">
             Light roasts that taste like the fruit coffee comes from. Small lots, roasted to order, picked up or delivered close to home.
           </p>
@@ -111,6 +111,20 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="section bags" aria-label="Our bags">
+        <div className="wrap">
+          <div className="bag-grid">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/img/brand/bag-x.webp" alt="Experience Coffee bag with the X monogram" width={1400} height={1315} loading="lazy" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/img/brand/bag-wordmark.webp" alt="Experience Coffee bag with the wordmark" width={1400} height={1315} loading="lazy" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/img/brand/bag-noir.webp" alt="Experience Coffee bag with the black and gold side panel" width={1400} height={1315} loading="lazy" />
+          </div>
+          <p className="bag-caption">Roasted to order and packed by hand in Lyndhurst, New Jersey.</p>
+        </div>
+      </section>
+
       <section className="section" aria-labelledby="menu-title">
         <div className="wrap">
           <div className="section-head">
@@ -125,7 +139,7 @@ export default async function HomePage() {
 
       {coldBrew ? (
         <section className="section noir">
-          <Branch className="noir-branch" />
+          <Branch name="a" gold className="noir-branch" />
           <div className="wrap split">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {coldBrew.images[0] ? <img src={coldBrew.images[0]} alt={coldBrew.title} loading="lazy" /> : <div />}
