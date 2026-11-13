@@ -13,6 +13,7 @@ const OWNER_LINKS: ([string, string] | "hr")[] = [
   "hr",
   ["/admin/finance", "Profit and taxes"],
   ["/admin/expenses", "Expenses"],
+  ["/admin/loans", "Loans"],
   ["/admin/timeclock", "Time clock"],
   "hr",
   ["/admin/marketing", "Email marketing"],

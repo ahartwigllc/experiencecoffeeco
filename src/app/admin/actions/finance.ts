@@ -46,3 +46,26 @@ export async function deleteExpense(formData: FormData) {
   revalidatePath("/admin/expenses");
   flash("/admin/expenses", "ok", "Expense deleted.");
 }
+
+export async function addLoanEntry(formData: FormData) {
+  await requireOwner();
+  const entryOn = String(formData.get("entryOn") ?? "");
+  const amount = parseDollarsToCents(formData.get("amount"));
+  const lender = String(formData.get("lender") ?? "").trim();
+  const kind = formData.get("kind") === "payment" ? "payment" : "draw";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(entryOn)) flash("/admin/loans", "error", "Pick the date.");
+  if (!amount || amount <= 0) flash("/admin/loans", "error", "Enter the amount.");
+  if (!lender) flash("/admin/loans", "error", "Say who the loan is from.");
+  await db()
+    .insert(schema.loanEntries)
+    .values({ entryOn, lender, kind, amountCents: amount!, note: String(formData.get("note") ?? "").trim() || null });
+  revalidatePath("/admin/loans");
+  flash("/admin/loans", "ok", kind === "draw" ? "Loan money in recorded." : "Loan payment recorded.");
+}
+
+export async function deleteLoanEntry(formData: FormData) {
+  await requireOwner();
+  await db().delete(schema.loanEntries).where(eq(schema.loanEntries.id, Number(formData.get("id"))));
+  revalidatePath("/admin/loans");
+  flash("/admin/loans", "ok", "Entry deleted.");
+}

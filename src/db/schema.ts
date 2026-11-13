@@ -311,6 +311,23 @@ export const expenses = pgTable(
   (t) => [index("expenses_spent_idx").on(t.spentOn)],
 );
 
+/* -------------------------------------------------------------------- loans */
+
+/** Money lent to the business (draw) and paid back (payment). Not income or expense; kept off the P&L. */
+export const loanEntries = pgTable(
+  "loan_entries",
+  {
+    id: serial("id").primaryKey(),
+    entryOn: date("entry_on").notNull(),
+    lender: text("lender").notNull(),
+    kind: text("kind", { enum: ["draw", "payment"] }).notNull(),
+    amountCents: integer("amount_cents").notNull(),
+    note: text("note"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("loan_entries_on_idx").on(t.entryOn)],
+);
+
 /* ---------------------------------------------------------------- marketing */
 
 export const subscribers = pgTable("subscribers", {
@@ -435,5 +452,6 @@ export type Coupon = typeof coupons.$inferSelect;
 export type Staff = typeof staff.$inferSelect;
 export type TimeEntry = typeof timeEntries.$inferSelect;
 export type Expense = typeof expenses.$inferSelect;
+export type LoanEntry = typeof loanEntries.$inferSelect;
 export type Subscriber = typeof subscribers.$inferSelect;
 export type Campaign = typeof campaigns.$inferSelect;
