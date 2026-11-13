@@ -1,4 +1,5 @@
 import type { Product } from "@/db/schema";
+import { gramsToLbs } from "@/lib/bean-stock";
 import { centsToInput } from "@/lib/money";
 import { saveProduct } from "../../actions/products";
 
@@ -10,6 +11,7 @@ export function ProductForm({ product, defaultDiscountPercent }: { product?: Pro
       : discountType === "amount"
         ? centsToInput(product.subscriptionDiscountValue)
         : String(product.subscriptionDiscountValue);
+  const greenLbs = product?.greenStockGrams == null ? "" : String(Math.round(gramsToLbs(product.greenStockGrams) * 100) / 100);
   return (
     <form action={saveProduct} className="admin-form card" style={{ maxWidth: 900 }}>
       {product ? <input type="hidden" name="id" value={product.id} /> : null}
@@ -41,6 +43,13 @@ export function ProductForm({ product, defaultDiscountPercent }: { product?: Pro
             <option value="cold_brew">Cold brew</option>
             <option value="other">Other</option>
           </select>
+        </div>
+        <div className="field">
+          <label htmlFor="greenStockLbs">
+            Green coffee on hand (lb) <span className="field-hint">Coffee only. Every size and grind draws from this, with 15% roast loss. Blank = don&apos;t track.</span>
+          </label>
+          <input id="greenStockLbs" name="greenStockLbs" inputMode="decimal" defaultValue={greenLbs} placeholder="not tracked" />
+          <input type="hidden" name="greenStockLbsWas" value={greenLbs} />
         </div>
         <div className="field">
           <label htmlFor="sortOrder">Sort order</label>

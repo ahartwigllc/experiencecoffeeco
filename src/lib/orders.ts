@@ -1,6 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { db, schema } from "@/db/client";
 import type { Order, OrderItem } from "@/db/schema";
+import { greenGramsPerUnit } from "./bean-stock";
 import { formatDate } from "./dates";
 import { button, emailLayout, sendEmail } from "./email";
 import { siteUrl } from "./env";
@@ -60,10 +61,29 @@ export async function insertOrderItems(orderId: number, items: NewOrderItem[]): 
   await db().insert(schema.orderItems).values(items.map((i) => ({ ...i, orderId })));
 }
 
-/** Decrements stock for tracked variants. Stock may go negative; admin flags it. */
+/**
+ * Takes sold items out of stock. Coffees with green stock (roast to order) draw green grams from the
+ * product; everything else decrements its variant when tracked. Stock may go negative; admin flags it.
+ */
 export async function decrementInventory(items: { variantId?: number | null; quantity: number }[]): Promise<void> {
   for (const i of items) {
     if (!i.variantId) continue;
+    const row = await db()
+      .select({ size: schema.variants.size, productId: schema.variants.productId, green: schema.products.greenStockGrams })
+      .from(schema.variants)
+      .innerJoin(schema.products, eq(schema.products.id, schema.variants.productId))
+      .where(eq(schema.variants.id, i.variantId))
+      .limit(1);
+    const v = row[0];
+    const per = v && v.green !== null ? greenGramsPerUnit(v.size) : null;
+    if (v && per !== null) {
+      const grams = Math.round(per * i.quantity);
+      await db()
+        .update(schema.products)
+        .set({ greenStockGrams: sql`${schema.products.greenStockGrams} - ${grams}`, updatedAt: sql`now()` })
+        .where(eq(schema.products.id, v.productId));
+      continue;
+    }
     await db()
       .update(schema.variants)
       .set({ inventory: sql`${schema.variants.inventory} - ${i.quantity}`, updatedAt: sql`now()` })

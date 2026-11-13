@@ -5,6 +5,7 @@ import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { Flash } from "@/components/admin/Flash";
 import { db, schema } from "@/db/client";
 import { requireOwner } from "@/lib/auth";
+import { formatLbs, unitsFromGreenStock } from "@/lib/bean-stock";
 import { centsToInput, formatCents, percent } from "@/lib/money";
 import { applySubscriptionDiscount, resolveSubscriptionDiscount, subscriptionDiscountLabel } from "@/lib/pricing";
 import { getSettings } from "@/lib/settings";
@@ -26,6 +27,9 @@ export default async function EditProductPage({ params, searchParams }: { params
   const discountText =
     (saveLabel ? `${saveLabel} off${discount.kind === "amount" ? " each item" : ""}` : "no discount") +
     (product.subscriptionDiscountType === "default" ? " (store default)" : "");
+
+  const beanTracked = product.greenStockGrams !== null;
+  const bagsFromGreen = (size: string | null) => (beanTracked ? unitsFromGreenStock(product.greenStockGrams!, size) : null);
 
   return (
     <>
@@ -50,6 +54,12 @@ export default async function EditProductPage({ params, searchParams }: { params
           Unit cost is what one bag or box costs you to make: green coffee, roast loss, bag, label. It drives every profit number.
           Subscription price: {discountText}. Change it under Subscriber discount below.
         </p>
+        {beanTracked ? (
+          <p className="small">
+            <strong>Green coffee on hand: {formatLbs(product.greenStockGrams!)}.</strong>{" "}
+            <span className="muted">Roasted and ground to order, so every option below draws from it; the Stock column shows how many bags it covers. Update it under Green coffee on hand below.</span>
+          </p>
+        ) : null}
         {product.variants.length > 0 ? (
           <form action={saveVariants}>
             <input type="hidden" name="productId" value={product.id} />
@@ -92,12 +102,24 @@ export default async function EditProductPage({ params, searchParams }: { params
                         </td>
                         <td className="num">{m === null ? "—" : percent(m, 0)}</td>
                         <td className="num">{sm === null ? "—" : `${percent(sm, 0)} at ${formatCents(sub)}`}</td>
-                        <td>
-                          <input name={`v_${v.id}_inventory`} type="number" defaultValue={v.inventory} aria-label="Stock" style={{ width: 75 }} className={v.trackInventory && v.inventory < 0 ? "negative" : ""} />
-                        </td>
-                        <td>
-                          <input type="checkbox" name={`v_${v.id}_track`} defaultChecked={v.trackInventory} aria-label="Track stock" />
-                        </td>
+                        {bagsFromGreen(v.size) !== null ? (
+                          <>
+                            <td className="small">
+                              {bagsFromGreen(v.size)} bags
+                              <input type="hidden" name={`v_${v.id}_inventory`} value={v.inventory} />
+                            </td>
+                            <td className="small muted">from green</td>
+                          </>
+                        ) : (
+                          <>
+                            <td>
+                              <input name={`v_${v.id}_inventory`} type="number" defaultValue={v.inventory} aria-label="Stock" style={{ width: 75 }} className={v.trackInventory && v.inventory < 0 ? "negative" : ""} />
+                            </td>
+                            <td>
+                              <input type="checkbox" name={`v_${v.id}_track`} defaultChecked={v.trackInventory} aria-label="Track stock" />
+                            </td>
+                          </>
+                        )}
                         <td>
                           <input type="checkbox" name={`v_${v.id}_active`} defaultChecked={v.active} aria-label="For sale" />
                         </td>
@@ -165,7 +187,7 @@ export default async function EditProductPage({ params, searchParams }: { params
             </div>
           </div>
           <label className="check">
-            <input type="checkbox" name="track" defaultChecked={product.kind !== "cold_brew"} /> Track stock (turn off for made-to-order)
+            <input type="checkbox" name="track" defaultChecked={product.kind === "other"} /> Track stock (turn off for made-to-order)
           </label>
           <div>
             <button className="btn btn-small" type="submit">

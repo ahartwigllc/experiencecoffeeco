@@ -3,6 +3,7 @@ import { asc } from "drizzle-orm";
 import { Flash } from "@/components/admin/Flash";
 import { db, schema } from "@/db/client";
 import { requireOwner } from "@/lib/auth";
+import { formatLbs } from "@/lib/bean-stock";
 import { priceRange } from "@/lib/catalog-utils";
 import { formatCents, percent } from "@/lib/money";
 
@@ -56,7 +57,15 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
                   </td>
                   <td className="num">{active.length}</td>
                   <td className="num">{range ? (range.min === range.max ? formatCents(range.min) : `${formatCents(range.min)} to ${formatCents(range.max)}`) : "—"}</td>
-                  <td className="num">{tracked.length ? tracked.reduce((a, v) => a + v.inventory, 0) : "made to order"}</td>
+                  <td className="num">
+                    {p.greenStockGrams !== null ? (
+                      <span className={p.greenStockGrams <= 0 ? "negative" : ""}>{formatLbs(p.greenStockGrams)} green</span>
+                    ) : tracked.length ? (
+                      tracked.reduce((a, v) => a + v.inventory, 0)
+                    ) : (
+                      "made to order"
+                    )}
+                  </td>
                   <td className="num">
                     {margin === null ? <span className="badge amber">add costs</span> : percent(margin, 0)}
                     {withCost.length > 0 && withCost.length < active.length ? <div className="small muted">partial</div> : null}

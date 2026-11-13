@@ -7,6 +7,7 @@ import { requireOwner } from "@/lib/auth";
 import { flash } from "@/lib/flash";
 import { parseDollarsToCents } from "@/lib/money";
 import { isSubscriptionDiscountType, type SubscriptionDiscountType } from "@/lib/pricing";
+import { lbsToGrams } from "@/lib/bean-stock";
 
 export async function slugify(s: string): Promise<string> {
   return s
@@ -40,6 +41,17 @@ function parseSubscriptionDiscount(formData: FormData, id: number | null): { sub
   return { subscriptionDiscountType: "amount", subscriptionDiscountValue: cents };
 }
 
+function parseGreenStock(formData: FormData, id: number | null): { greenStockGrams?: number | null } {
+  const raw = String(formData.get("greenStockLbs") ?? "").trim().replace(/\s*(lbs?|pounds?)$/i, "");
+  const was = String(formData.get("greenStockLbsWas") ?? "").trim();
+  if (id && raw === was) return {}; // unchanged: leave stock as sales have moved it
+  if (raw === "") return { greenStockGrams: null };
+  const lb = Number(raw);
+  if (!Number.isFinite(lb) || lb < 0)
+    flash(id ? `/admin/products/${id}` : "/admin/products/new", "error", "Green coffee on hand should be a number of pounds, like 22.5.");
+  return { greenStockGrams: lbsToGrams(lb) };
+}
+
 export async function saveProduct(formData: FormData) {
   await requireOwner();
   const id = Number(formData.get("id")) || null;
@@ -68,6 +80,7 @@ export async function saveProduct(formData: FormData) {
     ...parseSubscriptionDiscount(formData, id),
     featured: formData.get("featured") === "on",
     sortOrder: Number(formData.get("sortOrder")) || 0,
+    ...parseGreenStock(formData, id),
     updatedAt: new Date(),
   };
 

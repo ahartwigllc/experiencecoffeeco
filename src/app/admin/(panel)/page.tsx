@@ -6,11 +6,14 @@ import { requireOwner } from "@/lib/auth";
 import { customerName } from "@/lib/customers";
 import { formatDateTime, formatTime, rangeBounds } from "@/lib/dates";
 import { isEmailConfigured } from "@/lib/email";
+import { formatLbs, lbsToGrams } from "@/lib/bean-stock";
 import { getFinanceReport } from "@/lib/finance";
 import { formatCents } from "@/lib/money";
 import { isInterval, monthlyValueCents } from "@/lib/pricing";
 import { getSettings } from "@/lib/settings";
 import { isStripeConfigured } from "@/lib/stripe";
+
+const LOW_GREEN_LBS = 5;
 
 export default async function Dashboard({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   await requireOwner();
@@ -38,6 +41,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         .where(
           and(
             eq(schema.variants.trackInventory, true),
+            isNull(schema.products.greenStockGrams),
             eq(schema.variants.active, true),
             eq(schema.products.status, "active"),
             lte(schema.variants.inventory, settings.lowInventoryThreshold),
@@ -55,6 +59,12 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         .where(and(isNull(schema.variants.unitCostCents), eq(schema.products.status, "active"), eq(schema.variants.active, true))),
       db().select({ value: count() }).from(schema.stripeEvents),
     ]);
+
+  const lowGreen = await db()
+    .select({ id: schema.products.id, title: schema.products.title, grams: schema.products.greenStockGrams })
+    .from(schema.products)
+    .where(and(eq(schema.products.status, "active"), lte(schema.products.greenStockGrams, lbsToGrams(LOW_GREEN_LBS))))
+    .orderBy(asc(schema.products.greenStockGrams));
 
   const mrr = subs
     .filter((s) => !s.paused)
@@ -184,11 +194,22 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           </div>
           <div className="card">
             <h2>Low stock</h2>
-            {lowStock.length === 0 ? (
-              <p className="muted">Everything tracked is above {settings.lowInventoryThreshold}.</p>
+            {lowStock.length === 0 && lowGreen.length === 0 ? (
+              <p className="muted">
+                Green coffee is above {LOW_GREEN_LBS} lb and everything else tracked is above {settings.lowInventoryThreshold}.
+              </p>
             ) : (
               <table className="data">
                 <tbody>
+                  {lowGreen.map((g) => (
+                    <tr key={`g${g.id}`}>
+                      <td>
+                        <Link href={`/admin/products/${g.id}`}>{g.title}</Link>
+                        <div className="small muted">green coffee</div>
+                      </td>
+                      <td className={`num ${g.grams! <= 0 ? "negative" : ""}`}>{formatLbs(g.grams!)}</td>
+                    </tr>
+                  ))}
                   {lowStock.map((r) => (
                     <tr key={r.v.id}>
                       <td>
