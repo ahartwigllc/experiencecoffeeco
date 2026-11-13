@@ -73,6 +73,8 @@ export const products = pgTable("products", {
   /** default = store-wide % from Settings; percent = own % (0–90); amount = cents off each unit. */
   subscriptionDiscountType: text("subscription_discount_type").notNull().default("default"),
   subscriptionDiscountValue: integer("subscription_discount_value"),
+  /** Green coffee on hand, in grams. Null = not tracked. All sizes/grinds draw from it (see lib/bean-stock). */
+  greenStockGrams: integer("green_stock_grams"),
   featured: boolean("featured").notNull().default(false),
   sortOrder: integer("sort_order").notNull().default(0),
   shopifyId: text("shopify_id").unique(),

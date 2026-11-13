@@ -3,6 +3,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db/client";
 import { getVariantsWithProducts } from "./catalog";
+import { greenGramsPerUnit, unitsFromGreenStock } from "./bean-stock";
 import { inStock, variantLabel } from "./catalog-utils";
 import { getCustomerEmail } from "./customer-auth";
 import { siteUrl } from "./env";
@@ -69,6 +70,14 @@ export async function createCheckoutSession(input: CheckoutInput): Promise<strin
   const qtyByVariant = new Map<number, number>();
   for (const l of lines) qtyByVariant.set(l.variantId, (qtyByVariant.get(l.variantId) ?? 0) + l.quantity);
 
+  const greenNeeded = new Map<number, number>();
+  for (const l of lines) {
+    const r = byId.get(l.variantId);
+    if (!r || r.product.greenStockGrams === null) continue;
+    const per = greenGramsPerUnit(r.variant.size);
+    if (per !== null) greenNeeded.set(r.product.id, (greenNeeded.get(r.product.id) ?? 0) + per * l.quantity);
+  }
+
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
   let subtotal = 0;
   for (const l of lines) {
@@ -77,7 +86,18 @@ export async function createCheckoutSession(input: CheckoutInput): Promise<strin
       throw new CheckoutError("An item in your cart is no longer available. Remove it and try again.");
     const label = variantLabel(r.variant);
     const name = r.product.title;
-    if (!inStock(r.variant, qtyByVariant.get(r.variant.id) ?? l.quantity))
+    const perUnit = r.product.greenStockGrams !== null ? greenGramsPerUnit(r.variant.size) : null;
+    if (perUnit !== null) {
+      // Roasted to order: every size and grind of this coffee shares one green-coffee stock.
+      if ((greenNeeded.get(r.product.id) ?? 0) > r.product.greenStockGrams! + 0.5) {
+        const left = unitsFromGreenStock(r.product.greenStockGrams!, r.variant.size) ?? 0;
+        throw new CheckoutError(
+          left > 0
+            ? `We only have enough ${name} left for ${left} more ${r.variant.size} bag${left === 1 ? "" : "s"}. Lower the quantity to continue.`
+            : `${name} is sold out until our next green coffee delivery. Remove it to continue.`,
+        );
+      }
+    } else if (!inStock(r.variant, qtyByVariant.get(r.variant.id) ?? l.quantity))
       throw new CheckoutError(
         `${name}${label ? ` (${label})` : ""} has only ${Math.max(r.variant.inventory, 0)} left. Lower the quantity to continue.`,
       );

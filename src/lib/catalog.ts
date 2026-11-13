@@ -1,15 +1,19 @@
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db/client";
 import type { Product, Variant } from "@/db/schema";
+import { applyBeanStock } from "./bean-stock";
 
 export type CatalogProduct = Product & { variants: Variant[] };
 
+const withBeanStock = (p: CatalogProduct): CatalogProduct => ({ ...p, variants: applyBeanStock(p, p.variants) });
+
 export async function listStoreProducts(): Promise<CatalogProduct[]> {
-  return db().query.products.findMany({
+  const rows = await db().query.products.findMany({
     where: eq(schema.products.status, "active"),
     with: { variants: { where: eq(schema.variants.active, true), orderBy: [asc(schema.variants.position), asc(schema.variants.id)] } },
     orderBy: [asc(schema.products.sortOrder), asc(schema.products.id)],
   });
+  return rows.map(withBeanStock);
 }
 
 export async function getStoreProduct(handle: string): Promise<CatalogProduct | null> {
@@ -17,7 +21,7 @@ export async function getStoreProduct(handle: string): Promise<CatalogProduct | 
     where: and(eq(schema.products.handle, handle), eq(schema.products.status, "active")),
     with: { variants: { where: eq(schema.variants.active, true), orderBy: [asc(schema.variants.position), asc(schema.variants.id)] } },
   });
-  return p ?? null;
+  return p ? withBeanStock(p) : null;
 }
 
 export async function getVariantsWithProducts(ids: number[]) {
