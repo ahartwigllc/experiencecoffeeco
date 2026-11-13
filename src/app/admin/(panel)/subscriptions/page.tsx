@@ -37,7 +37,7 @@ export default async function SubscriptionsPage({ searchParams }: { searchParams
       </div>
       <Flash {...sp} />
       <div className="stats">
-        <div className="stat"><div className="stat-label">Active</div><div className="stat-value">{live.length}</div></div>
+        <div className="stat"><div className="stat-label">Active</div><div className="stat-value">{live.filter((s) => !s.paused).length}</div></div>
         <div className="stat"><div className="stat-label">Paused</div><div className="stat-value">{live.filter((s) => s.paused).length}</div></div>
         <div className="stat"><div className="stat-label">Monthly recurring revenue</div><div className="stat-value">{formatCents(mrr)}</div></div>
         <div className="stat"><div className="stat-label">Past due</div><div className={`stat-value ${live.some((s) => s.status === "past_due") ? "negative" : ""}`}>{live.filter((s) => s.status === "past_due").length}</div></div>
@@ -74,7 +74,7 @@ export default async function SubscriptionsPage({ searchParams }: { searchParams
                     </span>
                   </td>
                   <td>{live && !s.paused ? formatDate(s.currentPeriodEnd) : "—"}</td>
-                  <td className="num">{formatCents(monthly)}</td>
+                  <td className="num">{live && !s.paused ? formatCents(monthly) : "—"}</td>
                   <td>
                     {live && (
                       <form action={changeSubscription} className="toolbar">
