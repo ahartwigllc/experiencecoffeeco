@@ -124,7 +124,7 @@ export async function inviteLegacySubscriber(formData: FormData) {
       bodyHtml: `<p>We've moved to our own website, so subscriptions from the old store don't carry over automatically. It takes about a minute to set yours back up, and you'll keep your subscriber discount.</p>
 <p>You were getting <strong>${escapeHtml(legacy.title)}</strong>, ${escapeHtml(INTERVALS[interval].short)}.</p>
 ${button("Restart my subscription", url)}
-<p style="font-size:14px;color:#6B5E57;">Your old subscription on the previous store has been or will be cancelled, so you won't be charged twice. Questions? Just reply.</p>`,
+<p style="font-size:14px;color:#76614A;">Your old subscription on the previous store has been or will be cancelled, so you won't be charged twice. Questions? Just reply.</p>`,
     }),
   });
   if (!r.ok) flash(PAGE, "error", `Invite not sent: ${r.error}`);

@@ -53,8 +53,9 @@ export function computePnl(i: PnlInput): Pnl {
     netProfitCents,
     grossMargin: revenueCents > 0 ? grossProfitCents / revenueCents : null,
     netMargin: revenueCents > 0 ? netProfitCents / revenueCents : null,
-    profitPerHourCents: i.hoursWorked > 0 ? Math.round(netProfitCents / i.hoursWorked) : null,
-    revenuePerHourCents: i.hoursWorked > 0 ? Math.round(revenueCents / i.hoursWorked) : null,
+    // Under 6 minutes logged, a per-hour figure is noise (a 25-second shift showed $2,302/hour).
+    profitPerHourCents: i.hoursWorked >= 0.1 ? Math.round(netProfitCents / i.hoursWorked) : null,
+    revenuePerHourCents: i.hoursWorked >= 0.1 ? Math.round(revenueCents / i.hoursWorked) : null,
     averageOrderCents: i.orders > 0 ? Math.round(revenueCents / i.orders) : null,
     incomeTaxReserveCents,
     takeHomeCents: netProfitCents - incomeTaxReserveCents,

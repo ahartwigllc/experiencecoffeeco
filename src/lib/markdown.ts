@@ -23,7 +23,7 @@ function inline(text: string): string {
   let out = escapeHtml(text);
   out = out.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_m, label: string, url: string) => {
     const href = safeUrl(url.replace(/&amp;/g, "&"));
-    return href ? `<a href="${escapeHtml(href)}" style="color:#8E1C2E;">${label}</a>` : label;
+    return href ? `<a href="${escapeHtml(href)}" style="color:#47372E;">${label}</a>` : label;
   });
   out = out.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   out = out.replace(/(^|[\s(])_([^_]+)_(?=[\s).,!?]|$)/g, "$1<em>$2</em>");
@@ -41,7 +41,7 @@ export function markdownToHtml(md: string): string {
       const href = safeUrl(button[2]!);
       if (href)
         html.push(
-          `<p style="margin:24px 0;"><a href="${escapeHtml(href)}" style="background:#8E1C2E;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:600;display:inline-block;">${escapeHtml(button[1]!)}</a></p>`,
+          `<p style="margin:24px 0;"><a href="${escapeHtml(href)}" style="background:#47372E;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:600;display:inline-block;">${escapeHtml(button[1]!)}</a></p>`,
         );
       continue;
     }

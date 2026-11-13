@@ -78,19 +78,20 @@ export async function sendBatch(messages: Mail[]): Promise<SendResult[]> {
 
 /* ---------------------------------------------------------------- layout */
 
-const C = { ink: "#2A1A14", red: "#8E1C2E", sage: "#E4E8DA", muted: "#6B5E57" };
+// Brand palette from the Canva designs (see globals.css).
+const C = { ink: "#33251E", red: "#47372E", sage: "#FCEFD6", muted: "#76614A" };
 
 export function emailLayout(opts: { title: string; bodyHtml: string; preview?: string; footerHtml?: string }): string {
   const preview = opts.preview
     ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(opts.preview)}</div>`
     : "";
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(opts.title)}</title></head>
-<body style="margin:0;background:${C.sage};font-family:Georgia,'Times New Roman',serif;color:${C.ink};">${preview}
+<body style="margin:0;background:${C.sage};font-family:Montserrat,'Helvetica Neue',Arial,sans-serif;color:${C.ink};">${preview}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.sage};padding:32px 12px;"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;">
-<tr><td style="padding:28px 32px 0;font-family:Arial,Helvetica,sans-serif;font-weight:800;letter-spacing:-0.02em;font-size:20px;color:${C.red};">Experience Coffee</td></tr>
+<tr><td style="padding:28px 32px 0;"><a href="${siteUrl()}"><img src="${siteUrl()}/img/brand/logo.png" width="180" height="38" alt="Experience Coffee" style="display:block;border:0;width:180px;height:auto;"></a></td></tr>
 <tr><td style="padding:12px 32px 28px;font-size:16px;line-height:1.6;">
-<h1 style="font-family:Arial,Helvetica,sans-serif;font-size:24px;line-height:1.25;margin:8px 0 16px;">${escapeHtml(opts.title)}</h1>
+<h1 style="font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:26px;line-height:1.25;margin:12px 0 16px;color:${C.red};">${escapeHtml(opts.title)}</h1>
 ${opts.bodyHtml}
 </td></tr></table>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;"><tr><td style="padding:16px 32px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:${C.muted};">

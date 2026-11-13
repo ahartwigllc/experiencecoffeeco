@@ -91,10 +91,10 @@ function itemsTable(items: OrderItem[]): string {
   const rows = items
     .map((i) => {
       const interval = i.subscriptionInterval && isInterval(i.subscriptionInterval) ? ` (subscription, ${INTERVALS[i.subscriptionInterval].short})` : "";
-      return `<tr><td style="padding:6px 0;">${i.quantity} × ${escapeHtml(i.title)}${i.variantTitle ? `<br><span style="color:#6B5E57;font-size:14px;">${escapeHtml(i.variantTitle)}${interval}</span>` : interval}</td><td style="padding:6px 0;text-align:right;white-space:nowrap;">${formatCents(i.totalCents)}</td></tr>`;
+      return `<tr><td style="padding:6px 0;">${i.quantity} × ${escapeHtml(i.title)}${i.variantTitle ? `<br><span style="color:#76614A;font-size:14px;">${escapeHtml(i.variantTitle)}${interval}</span>` : interval}</td><td style="padding:6px 0;text-align:right;white-space:nowrap;">${formatCents(i.totalCents)}</td></tr>`;
     })
     .join("");
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #E4E8DA;border-bottom:1px solid #E4E8DA;margin:16px 0;">${rows}</table>`;
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #EADBC0;border-bottom:1px solid #EADBC0;margin:16px 0;">${rows}</table>`;
 }
 
 function totalsTable(o: Order): string {
@@ -118,7 +118,7 @@ ${itemsTable(order.items)}
 ${totalsTable(order)}
 <p style="margin-top:16px;">${escapeHtml(fulfillmentSummary(order, s))}</p>
 ${button("View your orders", `${siteUrl()}/account`)}
-<p style="font-size:14px;color:#6B5E57;">Questions? Reply to this email or write to ${escapeHtml(s.supportEmail)}.</p>`;
+<p style="font-size:14px;color:#76614A;">Questions? Reply to this email or write to ${escapeHtml(s.supportEmail)}.</p>`;
 
   if (order.email) {
     await sendEmail({
@@ -135,7 +135,7 @@ ${button("View your orders", `${siteUrl()}/account`)}
       subject: `New ${order.source === "subscription" ? "subscription renewal" : "order"} #${order.number}: ${formatCents(order.totalCents)} (${order.fulfillmentMethod})`,
       html: emailLayout({
         title: `New order #${order.number}`,
-        bodyHtml: `<p>From ${escapeHtml(who)} on ${formatDate(order.createdAt)}.</p>${order.needsReview ? `<p style="color:#8E1C2E;"><strong>Needs review:</strong> ${escapeHtml(order.reviewReason ?? "")}</p>` : ""}${itemsTable(order.items)}${totalsTable(order)}<p>${escapeHtml(fulfillmentSummary(order, s))}</p>${button("Open in admin", `${siteUrl()}/admin/orders/${order.id}`)}`,
+        bodyHtml: `<p>From ${escapeHtml(who)} on ${formatDate(order.createdAt)}.</p>${order.needsReview ? `<p style="color:#47372E;"><strong>Needs review:</strong> ${escapeHtml(order.reviewReason ?? "")}</p>` : ""}${itemsTable(order.items)}${totalsTable(order)}<p>${escapeHtml(fulfillmentSummary(order, s))}</p>${button("Open in admin", `${siteUrl()}/admin/orders/${order.id}`)}`,
       }),
     });
   }

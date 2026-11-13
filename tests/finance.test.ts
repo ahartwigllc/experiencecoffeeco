@@ -45,3 +45,11 @@ test("card fee estimate matches observed Shopify fees ($20 -> $0.88)", () => {
   assert.equal(estimateCardFeeCents(2000), 88);
   assert.equal(estimateCardFeeCents(0), 0);
 });
+
+test("per-hour figures need at least six minutes on the clock", () => {
+  const tiny = computePnl({ ...EMPTY_PNL_INPUT, orders: 1, grossCents: 1600, hoursWorked: 25 / 3600 });
+  assert.equal(tiny.profitPerHourCents, null);
+  assert.equal(tiny.revenuePerHourCents, null);
+  const sixMinutes = computePnl({ ...EMPTY_PNL_INPUT, orders: 1, grossCents: 1600, hoursWorked: 0.1 });
+  assert.equal(sixMinutes.profitPerHourCents, 16000);
+});
