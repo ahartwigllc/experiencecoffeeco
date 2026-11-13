@@ -4,10 +4,11 @@ import { Flash } from "@/components/admin/Flash";
 import { db, schema } from "@/db/client";
 import { requireOwner } from "@/lib/auth";
 import { customerName } from "@/lib/customers";
-import { formatDateTime, formatTime, rangeBounds } from "@/lib/dates";
+import { formatDate, formatDateTime, formatTime, rangeBounds } from "@/lib/dates";
 import { isEmailConfigured } from "@/lib/email";
 import { formatLbs, lbsToGrams } from "@/lib/bean-stock";
 import { getFinanceReport } from "@/lib/finance";
+import { getLoanSummary, paidPercent } from "@/lib/loans";
 import { formatCents } from "@/lib/money";
 import { isInterval, monthlyValueCents } from "@/lib/pricing";
 import { getSettings } from "@/lib/settings";
@@ -66,6 +67,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     .where(and(eq(schema.products.status, "active"), lte(schema.products.greenStockGrams, lbsToGrams(LOW_GREEN_LBS))))
     .orderBy(asc(schema.products.greenStockGrams));
 
+  const loans = (await getLoanSummary()).filter((l) => l.owedCents > 0);
+
   const mrr = subs
     .filter((s) => !s.paused)
     .reduce((a, s) => a + s.items.reduce((b, i) => b + (isInterval(s.interval) ? monthlyValueCents(i.unitPriceCents, i.quantity, s.interval) : 0), 0), 0);
@@ -108,6 +111,21 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
       )}
 
       <div className="stats">
+        {loans.map((l) => (
+          <div className="stat" key={l.lender}>
+            <div className="stat-label">Owed to {l.lender.replace(/\s*\(.*\)$/, "")}</div>
+            <div className="stat-value">{formatCents(l.owedCents)}</div>
+            <div className="payoff" aria-label={`${paidPercent(l)}% paid back`}>
+              <span style={{ width: `${paidPercent(l)}%` }} />
+            </div>
+            <div className="stat-sub">
+              <Link href="/admin/loans">
+                {paidPercent(l)}% paid back
+                {l.lastPayment ? ` · last ${formatCents(l.lastPayment.amountCents)} on ${formatDate(`${l.lastPayment.on}T12:00:00Z`)}` : ""}
+              </Link>
+            </div>
+          </div>
+        ))}
         <div className="stat">
           <div className="stat-label">Sales today</div>
           <div className="stat-value">{formatCents(todayReport.total.revenueCents)}</div>

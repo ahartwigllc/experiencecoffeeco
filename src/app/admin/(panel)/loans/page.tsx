@@ -4,6 +4,7 @@ import { Flash } from "@/components/admin/Flash";
 import { db, schema } from "@/db/client";
 import { requireOwner } from "@/lib/auth";
 import { formatDate, localDateString } from "@/lib/dates";
+import { getLoanSummary, paidPercent } from "@/lib/loans";
 import { formatCents } from "@/lib/money";
 import { addLoanEntry, deleteLoanEntry } from "../../actions/finance";
 
@@ -12,15 +13,8 @@ export default async function LoansPage({ searchParams }: { searchParams: Promis
   const sp = await searchParams;
   const list = await db().select().from(schema.loanEntries).orderBy(desc(schema.loanEntries.entryOn), desc(schema.loanEntries.id));
 
-  const byLender = new Map<string, { borrowed: number; repaid: number }>();
-  for (const e of [...list].sort((a, b) => a.entryOn.localeCompare(b.entryOn))) {
-    const t = byLender.get(e.lender) ?? { borrowed: 0, repaid: 0 };
-    if (e.kind === "draw") t.borrowed += e.amountCents;
-    else t.repaid += e.amountCents;
-    byLender.set(e.lender, t);
-  }
-  const lenders = [...byLender.entries()].sort(([a], [b]) => a.localeCompare(b));
-  const owed = lenders.reduce((a, [, t]) => a + t.borrowed - t.repaid, 0);
+  const lenders = await getLoanSummary();
+  const owed = lenders.reduce((a, l) => a + l.owedCents, 0);
   const lastLender = list[0]?.lender ?? "";
 
   return (
@@ -44,15 +38,24 @@ export default async function LoansPage({ searchParams }: { searchParams: Promis
                 <th className="num">Borrowed</th>
                 <th className="num">Paid back</th>
                 <th className="num">Owed</th>
+                <th className="num">Paid back this year</th>
+                <th>Payoff</th>
               </tr>
             </thead>
             <tbody>
-              {lenders.map(([name, t]) => (
-                <tr key={name}>
-                  <td>{name}</td>
-                  <td className="num">{formatCents(t.borrowed)}</td>
-                  <td className="num">{formatCents(t.repaid)}</td>
-                  <td className="num">{formatCents(t.borrowed - t.repaid)}</td>
+              {lenders.map((l) => (
+                <tr key={l.lender}>
+                  <td>{l.lender}</td>
+                  <td className="num">{formatCents(l.borrowedCents)}</td>
+                  <td className="num">{formatCents(l.repaidCents)}</td>
+                  <td className="num">{formatCents(l.owedCents)}</td>
+                  <td className="num">{formatCents(l.paidThisYearCents)}</td>
+                  <td style={{ minWidth: 140 }}>
+                    <div className="payoff">
+                      <span style={{ width: `${paidPercent(l)}%` }} />
+                    </div>
+                    <span className="small muted">{paidPercent(l)}% paid</span>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -68,7 +71,7 @@ export default async function LoansPage({ searchParams }: { searchParams: Promis
           </div>
           <div className="field">
             <label htmlFor="kind">Type</label>
-            <select id="kind" name="kind" defaultValue="draw">
+            <select id="kind" name="kind" defaultValue="payment">
               <option value="draw">Money in (borrowed)</option>
               <option value="payment">Payment back</option>
             </select>

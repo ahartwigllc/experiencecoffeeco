@@ -2074,3 +2074,7 @@ textarea:focus {
 html {
   scroll-padding-top: 88px;
 }
+
+/* Loan payoff progress */
+.payoff { height: 8px; border-radius: 999px; background: var(--line); overflow: hidden; margin: 8px 0 4px; }
+.payoff > span { display: block; height: 100%; background: var(--espresso); }
