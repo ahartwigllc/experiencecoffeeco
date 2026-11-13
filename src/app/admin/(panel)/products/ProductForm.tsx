@@ -70,6 +70,20 @@ export function ProductForm({ product, defaultDiscountPercent }: { product?: Pro
           <input id="cuppingScore" name="cuppingScore" defaultValue={product?.cuppingScore ?? ""} placeholder="87.5" />
         </div>
       </div>
+      <div className="row">
+        <div className="field">
+          <label htmlFor="gradeLabel">
+            Grade wording <span className="field-hint">Shown next to the score, e.g. Grade 1, or Specialty lot, under 5 defects.</span>
+          </label>
+          <input id="gradeLabel" name="gradeLabel" defaultValue={product?.gradeLabel ?? ""} placeholder="Grade 1" />
+        </div>
+        <div className="field">
+          <label htmlFor="funkLevel">
+            Clean ↔ Funky (0–100) <span className="field-hint">0 = very clean, 100 = very funky. Blank = guess from the process.</span>
+          </label>
+          <input id="funkLevel" name="funkLevel" type="number" min={0} max={100} defaultValue={product?.funkLevel ?? ""} placeholder="auto" />
+        </div>
+      </div>
       <div className="field">
         <label htmlFor="flavorNotes">
           Flavor notes <span className="field-hint">Comma separated. Shown large on the product page and home page.</span>
@@ -81,6 +95,12 @@ export function ProductForm({ product, defaultDiscountPercent }: { product?: Pro
           Description <span className="field-hint">HTML is allowed (paragraphs, bold, italics).</span>
         </label>
         <textarea id="descriptionHtml" name="descriptionHtml" rows={8} defaultValue={product?.descriptionHtml ?? ""} />
+      </div>
+      <div className="field">
+        <label htmlFor="moreInfoHtml">
+          More info <span className="field-hint">Farm, producer and processing background. Shown in a &quot;More info&quot; drop-down under the description. HTML allowed.</span>
+        </label>
+        <textarea id="moreInfoHtml" name="moreInfoHtml" rows={6} defaultValue={product?.moreInfoHtml ?? ""} />
       </div>
       <div className="field">
         <label htmlFor="images">

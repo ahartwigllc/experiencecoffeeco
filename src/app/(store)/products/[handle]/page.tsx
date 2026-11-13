@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/AddToCart";
 import { ProductGallery } from "@/components/ProductGallery";
-import { FlavorScale, TastingCard } from "@/components/brand/TastingCard";
+import { FlavorScale, GradeScale, TastingCard } from "@/components/brand/TastingCard";
 import { getStoreProduct } from "@/lib/catalog";
 import { priceRange, splitNotes } from "@/lib/catalog-utils";
 import { siteUrl } from "@/lib/env";
@@ -74,7 +74,8 @@ export default async function ProductPage({ params, searchParams }: Params) {
             footer={sizes ? `Whole bean or ground · ${sizes}` : null}
             score={p.cuppingScore}
           />
-          <FlavorScale process={p.process} title={p.title} />
+          <GradeScale score={p.cuppingScore} label={p.gradeLabel} />
+          <FlavorScale process={p.process} title={p.title} level={p.funkLevel} />
           <AddToCart
             product={{ id: p.id, title: p.title, handle: p.handle, image: p.images[0], subscriptionEnabled: p.subscriptionEnabled }}
             variants={p.variants.map((v) => ({
@@ -98,6 +99,12 @@ export default async function ProductPage({ params, searchParams }: Params) {
             {settings.shippingEnabled ? <>Shipping anywhere in the US.</> : null}
           </div>
           <div className="prose" dangerouslySetInnerHTML={{ __html: p.descriptionHtml }} />
+          {p.moreInfoHtml ? (
+            <details className="more-info">
+              <summary>More info: the farm and how it&apos;s made</summary>
+              <div className="prose" dangerouslySetInnerHTML={{ __html: p.moreInfoHtml }} />
+            </details>
+          ) : null}
         </div>
       </div>
     </div>

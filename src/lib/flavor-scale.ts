@@ -3,7 +3,8 @@
  * Washed coffees taste clean; naturals and long anaerobic ferments taste wilder.
  * Returns null when there is nothing to go on (e.g. cold brew without a process).
  */
-export function funkiness(process?: string | null, title?: string | null): number | null {
+export function funkiness(process?: string | null, title?: string | null, level?: number | null): number | null {
+  if (level !== null && level !== undefined && Number.isFinite(level)) return Math.max(0, Math.min(100, level));
   const s = `${process ?? ""} ${title ?? ""}`.toLowerCase();
   if (!process && !/washed|natural|honey|anaerobic/.test(s)) return null;
   let v = 50;

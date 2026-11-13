@@ -62,6 +62,9 @@ export function SiteFooter({ settings }: { settings: Settings }) {
             <h2>Info</h2>
             <ul>
               <li>
+                <Link href="/grading">How coffee is graded</Link>
+              </li>
+              <li>
                 <Link href="/policies/delivery">Delivery and pickup</Link>
               </li>
               <li>

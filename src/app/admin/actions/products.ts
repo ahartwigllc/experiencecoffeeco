@@ -73,6 +73,13 @@ export async function saveProduct(formData: FormData) {
     process: str(formData, "process"),
     flavorNotes: str(formData, "flavorNotes"),
     cuppingScore: str(formData, "cuppingScore"),
+    gradeLabel: str(formData, "gradeLabel"),
+    moreInfoHtml: String(formData.get("moreInfoHtml") ?? "").trim() || null,
+    funkLevel: (() => {
+      const raw = String(formData.get("funkLevel") ?? "").trim();
+      const n = Number(raw);
+      return raw === "" || !Number.isFinite(n) ? null : Math.max(0, Math.min(100, Math.round(n)));
+    })(),
     descriptionHtml: String(formData.get("descriptionHtml") ?? ""),
     images,
     taxCode: str(formData, "taxCode"),

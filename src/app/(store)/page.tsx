@@ -92,7 +92,7 @@ export default async function HomePage() {
                 footer={featuredSizes ? `Whole bean or ground · ${featuredSizes}` : "Whole bean or ground"}
                 score={featured.cuppingScore}
               />
-              <FlavorScale process={featured.process} title={featured.title} />
+              <FlavorScale process={featured.process} title={featured.title} level={featured.funkLevel} />
               <div className="buy-row">
                 <Link className="btn" href={`/products/${featured.handle}`}>
                   Try it{featuredPrice ? `, from ${formatCents(featuredPrice)}` : ""}

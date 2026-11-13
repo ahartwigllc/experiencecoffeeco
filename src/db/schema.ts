@@ -75,6 +75,12 @@ export const products = pgTable("products", {
   subscriptionDiscountValue: integer("subscription_discount_value"),
   /** Green coffee on hand, in grams. Null = not tracked. All sizes/grinds draw from it (see lib/bean-stock). */
   greenStockGrams: integer("green_stock_grams"),
+  /** Farm, producer and processing background, shown under "More info" on the product page. */
+  moreInfoHtml: text("more_info_html"),
+  /** Grade wording shown with the score, e.g. "Grade 1" or "Specialty lot, under 5 defects". */
+  gradeLabel: text("grade_label"),
+  /** Clean (0) to funky (100). Null = estimate from the process. */
+  funkLevel: integer("funk_level"),
   featured: boolean("featured").notNull().default(false),
   sortOrder: integer("sort_order").notNull().default(0),
   shopifyId: text("shopify_id").unique(),
