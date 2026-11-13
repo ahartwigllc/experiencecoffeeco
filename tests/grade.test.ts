@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { gradeBand, gradePosition, parseScore } from "../src/lib/grade.ts";
+import { gradeBand, gradePosition, parseScore } from "../src/lib/grade";
 
 test("parses cupping scores", () => {
   assert.equal(parseScore("87.50"), 87.5);
