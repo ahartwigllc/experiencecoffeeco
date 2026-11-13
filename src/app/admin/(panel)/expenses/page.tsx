@@ -14,7 +14,7 @@ const RANGES: RangeKey[] = ["month", "last_month", "ytd", "all"];
 export default async function ExpensesPage({ searchParams }: { searchParams: Promise<{ range?: string; ok?: string; error?: string }> }) {
   await requireOwner();
   const sp = await searchParams;
-  const range: RangeKey = isRangeKey(sp.range) && RANGES.includes(sp.range) ? sp.range : "month";
+  const range: RangeKey = isRangeKey(sp.range) && RANGES.includes(sp.range) ? sp.range : "all";
   const { start, end } = rangeBounds(range);
   const settings = await getSettings();
   const list = await db()
