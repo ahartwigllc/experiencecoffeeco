@@ -224,15 +224,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section" aria-label="What customers say">
-        <div className="wrap quotes">
-          <blockquote>&ldquo;I didn&apos;t know coffee could be so smooth.&rdquo;</blockquote>
-          <blockquote>&ldquo;Having delicious cold brew on tap in my fridge changed my life, and it doesn&apos;t even need milk.&rdquo;</blockquote>
-          <blockquote>&ldquo;I normally have one cup in the morning, but I find myself drinking two or three since it&apos;s so good.&rdquo;</blockquote>
-          <blockquote>&ldquo;The option to grind for K-Cup changed my morning.&rdquo;</blockquote>
-        </div>
-      </section>
-
       <section className="section">
         <div className="wrap narrow center">
           <p className="eyebrow">Newsletter</p>
