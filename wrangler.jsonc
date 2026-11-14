@@ -15,7 +15,7 @@
   // Daily at 14:00 UTC (9 or 10am New York): subscription renewal reminders, 2 days ahead.
   "triggers": { "crons": ["0 14 * * *"] },
   "vars": {
-    "SITE_URL": "https://experience-coffee.ahartwigllc.workers.dev",
+    "SITE_URL": "https://experiencecoffee.co",
     "EMAIL_FROM": "Experience Coffee <hello@experiencecoffee.co>",
     "APP_TIMEZONE": "America/New_York"
   }
