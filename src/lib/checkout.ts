@@ -212,7 +212,8 @@ export async function createCheckoutSession(input: CheckoutInput): Promise<strin
       params.subscription_data.billing_cycle_anchor = Math.floor(firstCharge.getTime() / 1000);
       params.subscription_data.proration_behavior = "none";
       const note = `${WEDNESDAY_NOTE} Nothing is charged today. Your first charge is ${formatBillingDay(firstCharge)}.`;
-      const prior = params.custom_text?.submit?.message;
+      const submit = params.custom_text?.submit;
+      const prior = submit ? submit.message : undefined;
       params.custom_text = { submit: { message: prior ? `${note} ${prior}` : note } };
     }
   } else {
