@@ -3,6 +3,7 @@ import Link from "next/link";
 import { eq } from "drizzle-orm";
 import { ClearCart } from "@/components/CartLink";
 import { db, schema } from "@/db/client";
+import { formatBillingDay, nextBillingDay, WEDNESDAY_NOTE } from "@/lib/billing-day";
 import { getSettings } from "@/lib/settings";
 import { stripe } from "@/lib/stripe";
 import { handleCheckoutCompleted } from "@/lib/stripe-sync";
@@ -15,11 +16,13 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
   let email: string | null = null;
   let method: string | null = null;
   let orderNumber: number | null = null;
+  let firstCharge: string | null = null;
 
   if (session_id && /^cs_[A-Za-z0-9_]+$/.test(session_id)) {
     try {
       const s = await stripe().checkout.sessions.retrieve(session_id);
       email = s.customer_details?.email ?? null;
+      if (s.metadata?.billing === "wednesday" && (s.amount_total ?? 0) === 0) firstCharge = formatBillingDay(nextBillingDay(new Date(s.created * 1000)));
       method = s.metadata?.fulfillment ?? null;
       const find = () => db().query.orders.findFirst({ where: eq(schema.orders.stripeCheckoutSessionId, session_id) });
       let o = await find();
@@ -46,6 +49,12 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
       <div className="page-head">
         <h1>Thank you{orderNumber ? `. Order #${orderNumber} is in.` : "."}</h1>
       </div>
+      {firstCharge ? (
+        <p className="lede">
+          Your cold brew subscription is set. {WEDNESDAY_NOTE} Nothing was charged today: your first charge and order go through on{" "}
+          <strong>{firstCharge}</strong>, and we&apos;ll email you two days before each charge.{email ? ` A confirmation is on its way to ${email}.` : ""}
+        </p>
+      ) : (
       <p className="lede">
         {email ? `A receipt is on its way to ${email}. ` : "A receipt is on its way to your inbox. "}
         {method === "pickup"
@@ -54,6 +63,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
             ? "We'll bring it to you within a day or two and email you when it's on the way."
             : "We'll email you when it ships."}
       </p>
+      )}
       <div className="buy-row">
         <Link className="btn" href="/account">
           See your orders

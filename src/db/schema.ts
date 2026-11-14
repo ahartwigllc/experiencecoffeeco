@@ -104,6 +104,8 @@ export const variants = pgTable(
     sku: text("sku"),
     trackInventory: boolean("track_inventory").notNull().default(true),
     inventory: integer("inventory").notNull().default(0),
+    /** True = subscribers pay the one-time price for this option (e.g. 5lb bags, already discounted). */
+    noSubscriptionDiscount: boolean("no_subscription_discount").notNull().default(false),
     active: boolean("active").notNull().default(true),
     position: integer("position").notNull().default(0),
     shopifyId: text("shopify_id").unique(),
@@ -230,6 +232,8 @@ export const subscriptions = pgTable("subscriptions", {
   currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
   cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
   paused: boolean("paused").notNull().default(false),
+  /** The renewal date we last sent a "card will be charged" reminder for. */
+  reminderSentFor: timestamp("reminder_sent_for", { withTimezone: true }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });

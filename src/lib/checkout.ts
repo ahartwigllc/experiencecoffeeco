@@ -3,6 +3,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db/client";
 import { getVariantsWithProducts } from "./catalog";
+import { formatBillingDay, nextBillingDay, WEDNESDAY_NOTE } from "./billing-day";
 import { greenGramsPerUnit, unitsFromGreenStock } from "./bean-stock";
 import { inStock, variantLabel } from "./catalog-utils";
 import { getCustomerEmail } from "./customer-auth";
@@ -10,7 +11,7 @@ import { siteUrl } from "./env";
 import { formatCents } from "./money";
 import {
   INTERVALS,
-  applySubscriptionDiscount,
+  subscriberPrice,
   isDeliveryZip,
   normalizeZip,
   resolveSubscriptionDiscount,
@@ -107,7 +108,11 @@ export async function createCheckoutSession(input: CheckoutInput): Promise<strin
         throw new CheckoutError("That delivery schedule isn't offered right now. Pick another schedule in your cart.");
     }
     const unit = l.interval
-      ? applySubscriptionDiscount(r.variant.priceCents, resolveSubscriptionDiscount(r.product, settings.subscriptionDiscountPercent))
+      ? subscriberPrice(
+          r.variant.priceCents,
+          resolveSubscriptionDiscount(r.product, settings.subscriptionDiscountPercent),
+          r.variant.noSubscriptionDiscount,
+        )
       : r.variant.priceCents;
     subtotal += unit * l.quantity;
     lineItems.push({
@@ -148,7 +153,17 @@ export async function createCheckoutSession(input: CheckoutInput): Promise<strin
     feeLabel = "Shipping";
   }
 
-  const metadata = { fulfillment: input.fulfillment, deliveryZip: zip };
+  // Cold brew subscriptions bill on Wednesdays: nothing is charged at checkout, the first charge
+  // (and order) happens on the next Wednesday, then every interval after on Wednesday.
+  const wednesday = isSubscription && lines.some((l) => l.interval && byId.get(l.variantId)?.product.kind === "cold_brew");
+  if (wednesday && lines.some((l) => !l.interval))
+    throw new CheckoutError(
+      "Cold brew subscriptions are billed on Wednesdays, so they check out on their own. Remove the one-time items, or buy them in a separate order.",
+    );
+  const firstCharge = wednesday ? nextBillingDay() : null;
+
+  const metadata: Record<string, string> = { fulfillment: input.fulfillment, deliveryZip: zip };
+  if (wednesday) metadata.billing = "wednesday";
   const params: Stripe.Checkout.SessionCreateParams = {
     mode: isSubscription ? "subscription" : "payment",
     line_items: lineItems,
@@ -193,6 +208,13 @@ export async function createCheckoutSession(input: CheckoutInput): Promise<strin
 
   if (isSubscription) {
     params.subscription_data = { metadata };
+    if (firstCharge) {
+      params.subscription_data.billing_cycle_anchor = Math.floor(firstCharge.getTime() / 1000);
+      params.subscription_data.proration_behavior = "none";
+      const note = `${WEDNESDAY_NOTE} Nothing is charged today. Your first charge is ${formatBillingDay(firstCharge)}.`;
+      const prior = params.custom_text?.submit?.message;
+      params.custom_text = { submit: { message: prior ? `${note} ${prior}` : note } };
+    }
   } else {
     params.customer_creation = "always";
     params.payment_intent_data = { metadata };

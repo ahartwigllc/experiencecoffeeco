@@ -7,7 +7,7 @@ import { db, schema } from "@/db/client";
 import { requireOwner } from "@/lib/auth";
 import { formatLbs, unitsFromGreenStock } from "@/lib/bean-stock";
 import { centsToInput, formatCents, percent } from "@/lib/money";
-import { applySubscriptionDiscount, resolveSubscriptionDiscount, subscriptionDiscountLabel } from "@/lib/pricing";
+import { resolveSubscriptionDiscount, subscriberPrice, subscriptionDiscountLabel } from "@/lib/pricing";
 import { getSettings } from "@/lib/settings";
 import { addVariants, removeVariant, saveVariants } from "../../../actions/products";
 import { ProductForm } from "../ProductForm";
@@ -75,6 +75,7 @@ export default async function EditProductPage({ params, searchParams }: { params
                     <th className="num">Sub. margin</th>
                     <th>Stock</th>
                     <th>Track stock</th>
+                    <th title="Subscribers get the discount on this option">Sub. discount</th>
                     <th>For sale</th>
                     <th>Order</th>
                     <th />
@@ -82,7 +83,7 @@ export default async function EditProductPage({ params, searchParams }: { params
                 </thead>
                 <tbody>
                   {product.variants.map((v) => {
-                    const sub = applySubscriptionDiscount(v.priceCents, discount);
+                    const sub = subscriberPrice(v.priceCents, discount, v.noSubscriptionDiscount);
                     const m = v.unitCostCents !== null && v.priceCents > 0 ? (v.priceCents - v.unitCostCents) / v.priceCents : null;
                     const sm = v.unitCostCents !== null && sub > 0 ? (sub - v.unitCostCents) / sub : null;
                     return (
@@ -120,6 +121,9 @@ export default async function EditProductPage({ params, searchParams }: { params
                             </td>
                           </>
                         )}
+                        <td>
+                          <input type="checkbox" name={`v_${v.id}_subdisc`} defaultChecked={!v.noSubscriptionDiscount} aria-label="Subscriber discount applies" />
+                        </td>
                         <td>
                           <input type="checkbox" name={`v_${v.id}_active`} defaultChecked={v.active} aria-label="For sale" />
                         </td>

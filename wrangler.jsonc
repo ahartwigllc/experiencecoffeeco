@@ -4,7 +4,7 @@
   // Add them with:  npx wrangler secret put STRIPE_SECRET_KEY
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "experience-coffee",
-  "main": ".open-next/worker.js",
+  "main": "custom-worker.ts",
   "compatibility_date": "2025-06-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
@@ -12,6 +12,8 @@
     "binding": "ASSETS"
   },
   "observability": { "enabled": true },
+  // Daily at 14:00 UTC (9 or 10am New York): subscription renewal reminders, 2 days ahead.
+  "triggers": { "crons": ["0 14 * * *"] },
   "vars": {
     "SITE_URL": "https://experience-coffee.ahartwigllc.workers.dev",
     "EMAIL_FROM": "Experience Coffee <hello@experiencecoffee.co>",

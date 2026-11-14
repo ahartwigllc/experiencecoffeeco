@@ -128,6 +128,7 @@ export async function saveVariants(formData: FormData) {
         unitCostCents: parseDollarsToCents(g("cost")),
         inventory: Math.trunc(Number(g("inventory")) || 0),
         trackInventory: g("track") === "on",
+        noSubscriptionDiscount: g("subdisc") !== "on",
         active: g("active") === "on",
         sku: String(g("sku") ?? "").trim() || null,
         position: Math.trunc(Number(g("position")) || 0),

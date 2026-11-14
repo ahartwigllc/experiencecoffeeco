@@ -4,6 +4,7 @@ import { db, schema } from "@/db/client";
 import { upsertCustomer } from "./customers";
 import { normalizeEmail } from "./http";
 import { decrementInventory, insertOrder, insertOrderItems, sendOrderEmails, type NewOrderItem } from "./orders";
+import { sendSubscriptionStartedEmails } from "./subscription-emails";
 import { intervalFromStripe, isDeliveryZip, normalizeZip } from "./pricing";
 import { getSettings } from "./settings";
 import { stripe } from "./stripe";
@@ -227,6 +228,20 @@ export async function handleCheckoutCompleted(sessionId: string): Promise<void> 
     address: method === "pickup" ? null : ship?.address ?? null,
   });
 
+  // Wednesday-billed subscription: nothing was charged at checkout, so there's no order yet. Save the
+  // subscription and confirm; the first order is created when the Wednesday invoice is paid.
+  const sessionSubId = idOf(session.subscription as string | Stripe.Subscription | null);
+  if (session.mode === "subscription" && (session.amount_total ?? 0) === 0 && meta.billing === "wednesday" && sessionSubId) {
+    const had = await db().query.subscriptions.findFirst({ where: eq(schema.subscriptions.stripeSubscriptionId, sessionSubId) });
+    await upsertSubscription(sessionSubId, {
+      customerId,
+      method,
+      address: method === "pickup" ? null : { name: ship?.name, ...ship?.address },
+    });
+    if (!had) await sendSubscriptionStartedEmails(sessionSubId);
+    return;
+  }
+
   const pi = session.payment_intent && typeof session.payment_intent !== "string" ? session.payment_intent : null;
   const invoice = session.invoice && typeof session.invoice !== "string" ? session.invoice : null;
   let charge: Stripe.Charge | null = null;
@@ -316,8 +331,10 @@ export async function handleInvoicePaid(invoiceId: string): Promise<void> {
   const invoice = await stripe().invoices.retrieve(invoiceId, {
     expand: ["lines.data.price.product", "charge.balance_transaction", "discounts"],
   });
-  // First invoice is recorded from checkout.session.completed.
-  if (invoice.billing_reason !== "subscription_cycle") return;
+  // First invoice is normally recorded from checkout.session.completed. Wednesday-billed subscriptions
+  // charge nothing at checkout, so their first paid invoice (whatever its billing reason) becomes an order.
+  const wednesday = invoice.subscription_details?.metadata?.billing === "wednesday";
+  if (invoice.billing_reason !== "subscription_cycle" && !(wednesday && invoice.amount_paid > 0)) return;
   const subId = idOf(invoice.subscription as string | Stripe.Subscription | null);
   if (!subId) return;
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { inStock, uniqueValues, variantLabel, type VariantLike } from "@/lib/catalog-utils";
 import { formatCents } from "@/lib/money";
-import { INTERVALS, applySubscriptionDiscount, subscriptionDiscountLabel, type Interval, type SubscriptionDiscount } from "@/lib/pricing";
+import { INTERVALS, subscriberPrice, subscriptionDiscountLabel, type Interval, type SubscriptionDiscount } from "@/lib/pricing";
 import { useCart } from "./CartProvider";
 
 type Props = {
@@ -14,9 +14,11 @@ type Props = {
   intervals: Interval[];
   defaultPurchase?: "once" | "sub";
   defaultInterval?: Interval;
+  /** Shown under the schedule when subscribing (e.g. cold brew bills on Wednesdays). */
+  subscriptionNote?: string;
 };
 
-export function AddToCart({ product, variants, discount, intervals, defaultPurchase = "once", defaultInterval }: Props) {
+export function AddToCart({ product, variants, discount, intervals, defaultPurchase = "once", defaultInterval, subscriptionNote }: Props) {
   const cart = useCart();
   const sizes = uniqueValues(variants.map((v) => v.size));
   const grinds = uniqueValues(variants.map((v) => v.grind));
@@ -39,8 +41,9 @@ export function AddToCart({ product, variants, discount, intervals, defaultPurch
 
   const available = variant ? inStock(variant, qty) : false;
   const onePrice = variant?.priceCents ?? 0;
-  const subPrice = applySubscriptionDiscount(onePrice, discount);
-  const saveLabel = subscriptionDiscountLabel(discount);
+  const exempt = Boolean(variant?.noSubscriptionDiscount);
+  const subPrice = subscriberPrice(onePrice, discount, exempt);
+  const saveLabel = exempt ? "" : subscriptionDiscountLabel(discount);
 
   function grindAvailable(g: string) {
     return variants.some((v) => v.grind === g && (sizes.length ? v.size === size : true) && inStock(v));
@@ -106,7 +109,9 @@ export function AddToCart({ product, variants, discount, intervals, defaultPurch
             <span>
               <strong>Subscribe</strong> {saveLabel ? <span className="save-tag">{saveLabel}</span> : null}
               <br />
-              <span className="stock-note">Skip, pause, or cancel any time.</span>
+              <span className="stock-note">
+                {exempt ? "This size is already our best price, so it's the same price on subscription. " : ""}Skip, pause, or cancel any time.
+              </span>
             </span>
             <span>{formatCents(subPrice)}</span>
           </label>
@@ -123,6 +128,7 @@ export function AddToCart({ product, variants, discount, intervals, defaultPurch
               </option>
             ))}
           </select>
+          {subscriptionNote ? <p className="stock-note">{subscriptionNote}</p> : null}
         </div>
       )}
 

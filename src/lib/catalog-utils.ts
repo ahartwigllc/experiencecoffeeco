@@ -9,6 +9,7 @@ export type VariantLike = {
   trackInventory: boolean;
   inventory: number;
   active: boolean;
+  noSubscriptionDiscount?: boolean;
 };
 
 export function inStock(v: Pick<VariantLike, "trackInventory" | "inventory">, qty = 1): boolean {

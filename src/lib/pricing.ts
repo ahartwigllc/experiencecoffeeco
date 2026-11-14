@@ -78,6 +78,11 @@ export function applySubscriptionDiscount(priceCents: number, discount: Subscrip
   return Math.max(priceCents - discount.cents, floor);
 }
 
+/** Subscriber price for one option: options marked "no subscriber discount" keep the one-time price. */
+export function subscriberPrice(priceCents: number, discount: SubscriptionDiscount, exempt?: boolean | null): number {
+  return exempt ? priceCents : applySubscriptionDiscount(priceCents, discount);
+}
+
 /** Short label for the storefront, e.g. "Save 20%" or "Save $3.00". Empty when there is no discount. */
 export function subscriptionDiscountLabel(discount: SubscriptionDiscount): string {
   if (discount.kind === "percent") return discount.percent > 0 ? `Save ${discount.percent}%` : "";

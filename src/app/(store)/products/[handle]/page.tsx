@@ -6,6 +6,7 @@ import { FlavorScale, GradeScale, TastingCard } from "@/components/brand/Tasting
 import { getStoreProduct } from "@/lib/catalog";
 import { priceRange, splitNotes } from "@/lib/catalog-utils";
 import { siteUrl } from "@/lib/env";
+import { formatBillingDay, nextBillingDay, WEDNESDAY_NOTE } from "@/lib/billing-day";
 import { isInterval, resolveSubscriptionDiscount } from "@/lib/pricing";
 import { getSettings } from "@/lib/settings";
 
@@ -87,7 +88,11 @@ export default async function ProductPage({ params, searchParams }: Params) {
               trackInventory: v.trackInventory,
               inventory: v.inventory,
               active: v.active,
+              noSubscriptionDiscount: v.noSubscriptionDiscount,
             }))}
+            subscriptionNote={
+              p.kind === "cold_brew" ? `${WEDNESDAY_NOTE} Nothing is charged today; your first charge would be ${formatBillingDay(nextBillingDay())}.` : undefined
+            }
             discount={resolveSubscriptionDiscount(p, settings.subscriptionDiscountPercent)}
             intervals={settings.subscriptionIntervals}
             defaultPurchase={subscribe ? "sub" : "once"}
