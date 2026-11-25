@@ -17,12 +17,20 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
   let method: string | null = null;
   let orderNumber: number | null = null;
   let firstCharge: string | null = null;
+  let wednesdayNote = false;
+  let legacy = false;
 
   if (session_id && /^cs_[A-Za-z0-9_]+$/.test(session_id)) {
     try {
-      const s = await stripe().checkout.sessions.retrieve(session_id);
+      const s = await stripe().checkout.sessions.retrieve(session_id, { expand: ["subscription"] });
       email = s.customer_details?.email ?? null;
-      if (s.metadata?.billing === "wednesday" && (s.amount_total ?? 0) === 0) firstCharge = formatBillingDay(nextBillingDay(new Date(s.created * 1000)));
+      const billing = s.metadata?.billing;
+      if ((billing === "wednesday" || billing === "anchored") && (s.amount_total ?? 0) === 0) {
+        const sub = s.subscription && typeof s.subscription !== "string" ? s.subscription : null;
+        firstCharge = formatBillingDay(sub?.current_period_end ? new Date(sub.current_period_end * 1000) : nextBillingDay(new Date(s.created * 1000)));
+        wednesdayNote = billing === "wednesday";
+        legacy = s.metadata?.legacy === "1";
+      }
       method = s.metadata?.fulfillment ?? null;
       const find = () => db().query.orders.findFirst({ where: eq(schema.orders.stripeCheckoutSessionId, session_id) });
       let o = await find();
@@ -51,7 +59,8 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
       </div>
       {firstCharge ? (
         <p className="lede">
-          Your cold brew subscription is set. {WEDNESDAY_NOTE} Nothing was charged today: your first charge and order go through on{" "}
+          {legacy ? "Thanks for approving the move. Your subscription carries on right where it left off." : "Your subscription is set."}{" "}
+          {wednesdayNote ? `${WEDNESDAY_NOTE} ` : ""}Nothing was charged today: your next charge and order go through on{" "}
           <strong>{firstCharge}</strong>, and we&apos;ll email you two days before each charge.{email ? ` A confirmation is on its way to ${email}.` : ""}
         </p>
       ) : (

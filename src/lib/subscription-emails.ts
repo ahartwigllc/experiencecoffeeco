@@ -26,8 +26,25 @@ function itemsHtml(sub: LoadedSub): string {
 const totalOf = (sub: LoadedSub) => sub.items.reduce((a, i) => a + i.unitPriceCents * i.quantity, 0);
 const scheduleOf = (sub: LoadedSub) => (isInterval(sub.interval) ? INTERVALS[sub.interval].short : sub.interval);
 
-/** Confirmation for a Wednesday-billed subscription, which has no order until its first charge. */
-export async function sendSubscriptionStartedEmails(stripeSubscriptionId: string): Promise<void> {
+/** Tells the owner to cancel a former Shopify subscriber's old subscription. */
+export async function sendLegacyMovedNotice(email: string | null): Promise<void> {
+  const s = await getSettings();
+  if (!s.ownerNotifyEmail || !email) return;
+  await sendEmail({
+    to: s.ownerNotifyEmail,
+    subject: `Moved from Shopify: cancel ${email}'s Shopify subscription`,
+    html: emailLayout({
+      title: "A Shopify subscriber moved over",
+      bodyHtml: `<p>${escapeHtml(email)} approved their subscription on the new site.</p><p><strong>Cancel their subscription in Shopify now</strong> so they aren't charged twice.</p>`,
+    }),
+  });
+}
+
+/** Confirmation for a subscription whose first charge is in the future (no order until then). */
+export async function sendSubscriptionStartedEmails(
+  stripeSubscriptionId: string,
+  opts: { wednesday?: boolean; legacy?: boolean } = { wednesday: true },
+): Promise<void> {
   const sub = await loadSub(stripeSubscriptionId);
   if (!sub) return;
   const s = await getSettings();
@@ -37,12 +54,12 @@ export async function sendSubscriptionStartedEmails(stripeSubscriptionId: string
     await sendEmail({
       to: email,
       replyTo: s.supportEmail,
-      subject: `Your cold brew subscription starts ${first}`,
+      subject: opts.legacy ? `You're all set: your subscription continues ${first}` : `Your subscription starts ${first}`,
       html: emailLayout({
         title: "You're subscribed",
         preview: `Your first charge is ${first}.`,
-        bodyHtml: `<p>Thanks for subscribing. ${escapeHtml(WEDNESDAY_NOTE)}</p>
-<p><strong>Nothing was charged today.</strong> Your first charge and order go through on <strong>${escapeHtml(first)}</strong>, then ${escapeHtml(scheduleOf(sub))} on Wednesdays after that. We'll email you two days before each charge.</p>
+        bodyHtml: `<p>${opts.legacy ? "Thanks for approving the move. Your subscription carries on right where it left off." : "Thanks for subscribing."}${opts.wednesday ? ` ${escapeHtml(WEDNESDAY_NOTE)}` : ""}</p>
+<p><strong>Nothing was charged today.</strong> Your next charge and order go through on <strong>${escapeHtml(first)}</strong>, then ${escapeHtml(scheduleOf(sub))}${opts.wednesday ? " on Wednesdays" : ""} after that. We'll email you two days before each charge.</p>
 ${itemsHtml(sub)}
 <p>Total each time: <strong>${formatCents(totalOf(sub))}</strong> (before any discount code).</p>
 ${button("Manage your subscription", `${siteUrl()}/account`)}
@@ -54,10 +71,10 @@ ${button("Manage your subscription", `${siteUrl()}/account`)}
     const who = sub.shipName || email || "a customer";
     await sendEmail({
       to: s.ownerNotifyEmail,
-      subject: `New cold brew subscription: ${who}, first charge ${first}`,
+      subject: `${opts.legacy ? "Moved from Shopify" : "New subscription"}: ${who}, first charge ${first}`,
       html: emailLayout({
         title: "New subscription",
-        bodyHtml: `<p>${escapeHtml(who)} subscribed (${escapeHtml(scheduleOf(sub))}, ${escapeHtml(sub.fulfillmentMethod)}). First charge and order: ${escapeHtml(first)}.</p>${itemsHtml(sub)}${button("Open subscriptions", `${siteUrl()}/admin/subscriptions`)}`,
+        bodyHtml: `<p>${escapeHtml(who)} subscribed (${escapeHtml(scheduleOf(sub))}, ${escapeHtml(sub.fulfillmentMethod)}). First charge and order: ${escapeHtml(first)}.</p>${opts.legacy ? "<p><strong>They moved from Shopify: cancel their Shopify subscription now so they aren't charged twice.</strong></p>" : ""}${itemsHtml(sub)}${button("Open subscriptions", `${siteUrl()}/admin/subscriptions`)}`,
       }),
     });
   }

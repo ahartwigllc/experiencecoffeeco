@@ -4,7 +4,7 @@ import { db, schema } from "@/db/client";
 import { upsertCustomer } from "./customers";
 import { normalizeEmail } from "./http";
 import { decrementInventory, insertOrder, insertOrderItems, sendOrderEmails, type NewOrderItem } from "./orders";
-import { sendSubscriptionStartedEmails } from "./subscription-emails";
+import { sendLegacyMovedNotice, sendSubscriptionStartedEmails } from "./subscription-emails";
 import { intervalFromStripe, isDeliveryZip, normalizeZip } from "./pricing";
 import { getSettings } from "./settings";
 import { stripe } from "./stripe";
@@ -231,14 +231,14 @@ export async function handleCheckoutCompleted(sessionId: string): Promise<void> 
   // Wednesday-billed subscription: nothing was charged at checkout, so there's no order yet. Save the
   // subscription and confirm; the first order is created when the Wednesday invoice is paid.
   const sessionSubId = idOf(session.subscription as string | Stripe.Subscription | null);
-  if (session.mode === "subscription" && (session.amount_total ?? 0) === 0 && meta.billing === "wednesday" && sessionSubId) {
+  if (session.mode === "subscription" && (session.amount_total ?? 0) === 0 && (meta.billing === "wednesday" || meta.billing === "anchored") && sessionSubId) {
     const had = await db().query.subscriptions.findFirst({ where: eq(schema.subscriptions.stripeSubscriptionId, sessionSubId) });
     await upsertSubscription(sessionSubId, {
       customerId,
       method,
       address: method === "pickup" ? null : { name: ship?.name, ...ship?.address },
     });
-    if (!had) await sendSubscriptionStartedEmails(sessionSubId);
+    if (!had) await sendSubscriptionStartedEmails(sessionSubId, { wednesday: meta.billing === "wednesday", legacy: meta.legacy === "1" });
     return;
   }
 
@@ -323,6 +323,7 @@ export async function handleCheckoutCompleted(sessionId: string): Promise<void> 
   }
 
   await sendOrderEmails(orderId);
+  if (meta.legacy === "1" && values.stripeSubscriptionId) await sendLegacyMovedNotice(email);
 }
 
 /* -------------------------------------------------------------- renewals */
@@ -333,7 +334,8 @@ export async function handleInvoicePaid(invoiceId: string): Promise<void> {
   });
   // First invoice is normally recorded from checkout.session.completed. Wednesday-billed subscriptions
   // charge nothing at checkout, so their first paid invoice (whatever its billing reason) becomes an order.
-  const wednesday = invoice.subscription_details?.metadata?.billing === "wednesday";
+  const billing = invoice.subscription_details?.metadata?.billing;
+  const wednesday = billing === "wednesday" || billing === "anchored";
   if (invoice.billing_reason !== "subscription_cycle" && !(wednesday && invoice.amount_paid > 0)) return;
   const subId = idOf(invoice.subscription as string | Stripe.Subscription | null);
   if (!subId) return;

@@ -46,7 +46,18 @@ function absoluteImage(url: string | undefined): string[] | undefined {
   return abs.startsWith("https://") ? [abs] : undefined; // Stripe requires public https images
 }
 
-export async function createCheckoutSession(input: CheckoutInput): Promise<string> {
+export type CheckoutOptions = {
+  /** Check out as this email (e.g. a one-click restart link) instead of the signed-in customer. */
+  email?: string;
+  /** Start subscription billing on this date (nothing charged at checkout). */
+  firstCharge?: Date;
+  /** A former Shopify subscriber moving over. */
+  legacy?: boolean;
+  /** Extra line shown above the pay button. */
+  note?: string;
+};
+
+export async function createCheckoutSession(input: CheckoutInput, opts: CheckoutOptions = {}): Promise<string> {
   const settings = await getSettings();
   const shape = validateCartShape(input.lines);
   if (!shape.ok) throw new CheckoutError(shape.error);
@@ -160,10 +171,11 @@ export async function createCheckoutSession(input: CheckoutInput): Promise<strin
     throw new CheckoutError(
       "Cold brew subscriptions are billed on Wednesdays, so they check out on their own. Remove the one-time items, or buy them in a separate order.",
     );
-  const firstCharge = wednesday ? nextBillingDay() : null;
+  const firstCharge = isSubscription ? (opts.firstCharge ?? (wednesday ? nextBillingDay() : null)) : null;
 
   const metadata: Record<string, string> = { fulfillment: input.fulfillment, deliveryZip: zip };
-  if (wednesday) metadata.billing = "wednesday";
+  if (firstCharge) metadata.billing = wednesday ? "wednesday" : "anchored";
+  if (opts.legacy) metadata.legacy = "1";
   const params: Stripe.Checkout.SessionCreateParams = {
     mode: isSubscription ? "subscription" : "payment",
     line_items: lineItems,
@@ -211,7 +223,13 @@ export async function createCheckoutSession(input: CheckoutInput): Promise<strin
     if (firstCharge) {
       params.subscription_data.billing_cycle_anchor = Math.floor(firstCharge.getTime() / 1000);
       params.subscription_data.proration_behavior = "none";
-      const note = `${WEDNESDAY_NOTE} Nothing is charged today. Your first charge is ${formatBillingDay(firstCharge)}.`;
+      const note = [
+        opts.note,
+        wednesday ? WEDNESDAY_NOTE : null,
+        `Nothing is charged today. Your first charge is ${formatBillingDay(firstCharge)}.`,
+      ]
+        .filter(Boolean)
+        .join(" ");
       const submit = params.custom_text?.submit;
       const prior = submit ? submit.message : undefined;
       params.custom_text = { submit: { message: prior ? `${note} ${prior}` : note } };
@@ -222,7 +240,7 @@ export async function createCheckoutSession(input: CheckoutInput): Promise<strin
   }
 
   // Signed-in customers check out against their existing Stripe customer.
-  const email = await getCustomerEmail();
+  const email = opts.email ?? (await getCustomerEmail());
   if (email) {
     const c = await db().query.customers.findFirst({ where: eq(schema.customers.email, email) });
     if (c?.stripeCustomerId) {

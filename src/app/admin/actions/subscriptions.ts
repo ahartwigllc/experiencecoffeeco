@@ -1,14 +1,16 @@
 "use server";
 
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db, schema } from "@/db/client";
 import { requireOwner } from "@/lib/auth";
 import { button, emailLayout, sendEmail } from "@/lib/email";
-import { siteUrl } from "@/lib/env";
 import { flash } from "@/lib/flash";
 import { escapeHtml } from "@/lib/markdown";
-import { INTERVALS, isInterval } from "@/lib/pricing";
+import { formatBillingDay, nextBillingDay } from "@/lib/billing-day";
+import { legacyInterval, listLegacySubscribers, restartUrl, type LegacySubscriber } from "@/lib/legacy-subscribers";
+import { formatCents } from "@/lib/money";
+import { INTERVALS, resolveSubscriptionDiscount, subscriberPrice } from "@/lib/pricing";
 import { getSettings, saveSettings } from "@/lib/settings";
 import { stripe } from "@/lib/stripe";
 import { upsertSubscription } from "@/lib/stripe-sync";
@@ -59,77 +61,61 @@ export async function syncAllSubscriptions() {
 
 /** Former Shopify subscribers, inferred from imported order history. */
 export async function getLegacySubscribers() {
-  const rows = await db()
-    .select({
-      email: schema.orders.email,
-      name: schema.orders.shipName,
-      createdAt: schema.orders.createdAt,
-      title: schema.orderItems.title,
-      variantTitle: schema.orderItems.variantTitle,
-      variantId: schema.orderItems.variantId,
-      productId: schema.orderItems.productId,
-      interval: schema.orderItems.subscriptionInterval,
-      quantity: schema.orderItems.quantity,
-      status: schema.orders.status,
-    })
-    .from(schema.orderItems)
-    .innerJoin(schema.orders, eq(schema.orders.id, schema.orderItems.orderId))
-    .where(sql`${schema.orders.source} = 'shopify' and ${schema.orderItems.subscriptionInterval} is not null and ${schema.orders.email} is not null`)
-    .orderBy(schema.orders.createdAt);
+  return listLegacySubscribers();
+}
 
-  const byEmail = new Map<string, { email: string; name: string | null; last: Date; count: number; interval: string; title: string; productId: number | null; quantity: number }>();
-  for (const r of rows) {
-    const e = r.email!.toLowerCase();
-    const prev = byEmail.get(e);
-    byEmail.set(e, {
-      email: e,
-      name: r.name ?? prev?.name ?? null,
-      last: r.createdAt,
-      count: (prev?.count ?? 0) + 1,
-      interval: r.interval!,
-      title: r.title,
-      productId: r.productId,
-      quantity: r.quantity,
-    });
-  }
-  // Anyone who already re-subscribed on the new site is no longer "legacy".
-  const emails = [...byEmail.keys()];
-  if (emails.length) {
-    const resubbed = await db()
-      .select({ email: schema.customers.email })
-      .from(schema.subscriptions)
-      .innerJoin(schema.customers, eq(schema.customers.id, schema.subscriptions.customerId))
-      .where(inArray(schema.customers.email, emails));
-    for (const r of resubbed) if (r.email) byEmail.delete(r.email);
-  }
-  return [...byEmail.values()].sort((a, b) => b.last.getTime() - a.last.getTime());
+async function sendInvite(l: LegacySubscriber, supportEmail: string) {
+  const settings = await getSettings();
+  const interval = legacyInterval(l);
+  const product = l.productId ? await db().query.products.findFirst({ where: eq(schema.products.id, l.productId), with: { variants: true } }) : null;
+  const variant = product?.variants.find((v) => v.id === l.variantId);
+  const price = product && variant ? subscriberPrice(variant.priceCents, resolveSubscriptionDiscount(product, settings.subscriptionDiscountPercent), variant.noSubscriptionDiscount) : null;
+  const first = l.name?.split(" ")[0];
+  const coldBrew = product?.kind === "cold_brew";
+  const next = coldBrew ? formatBillingDay(nextBillingDay(new Date(Math.max(Date.now(), l.nextDue.getTime() - 12 * 3600_000)))) : formatBillingDay(l.nextDue);
+  const url = await restartUrl(l.email);
+  return sendEmail({
+    to: l.email,
+    replyTo: supportEmail,
+    subject: "Please approve your Experience Coffee subscription",
+    html: emailLayout({
+      title: `${first ? `${escapeHtml(first)}, one` : "One"} quick tap to keep your coffee coming`,
+      preview: "We've moved to our own website. Approve your subscription in one step.",
+      bodyHtml: `<p>We've moved Experience Coffee off Shopify and onto our own website. Your subscription can't move by itself because your card stayed with Shopify, so we just need your OK.</p>
+<p><strong>${escapeHtml(l.quantity > 1 ? `${l.quantity} × ` : "")}${escapeHtml(l.title)}</strong>, ${escapeHtml(INTERVALS[interval].short)}${price !== null ? `, ${formatCents(price)} each time (your subscriber price)` : ""}.</p>
+${button("Approve my subscription", url)}
+<p>Tap the button, confirm your card once on our secure Stripe checkout, and you're done. <strong>Nothing is charged today.</strong> Your next order goes through on <strong>${escapeHtml(next)}</strong>, right on your usual schedule${coldBrew ? " (cold brew is billed Wednesdays, brewed Thursday into Friday, and delivered Saturday)" : ""}.</p>
+<p style="font-size:14px;color:#76614A;">We'll cancel your old Shopify subscription as soon as you approve, so you'll never be charged twice. You can skip, pause, or cancel any time from your account. Questions? Just reply.</p>`,
+    }),
+  });
 }
 
 export async function inviteLegacySubscriber(formData: FormData) {
   await requireOwner();
   const email = String(formData.get("email") ?? "").toLowerCase();
-  const legacy = (await getLegacySubscribers()).find((l) => l.email === email);
+  const legacy = (await listLegacySubscribers()).find((l) => l.email === email);
   if (!legacy) flash(PAGE, "error", "That customer isn't in the Shopify subscriber list.");
   const settings = await getSettings();
-  const product = legacy.productId ? await db().query.products.findFirst({ where: eq(schema.products.id, legacy.productId) }) : null;
-  const interval = isInterval(legacy.interval) ? legacy.interval : "month";
-  const url = product ? `${siteUrl()}/products/${product.handle}?subscribe=${interval}` : `${siteUrl()}/shop`;
-  const first = legacy.name?.split(" ")[0];
-  const r = await sendEmail({
-    to: email,
-    replyTo: settings.supportEmail,
-    subject: "Your Experience Coffee subscription has a new home",
-    html: emailLayout({
-      title: `${first ? `${first}, your` : "Your"} subscription is moving`,
-      bodyHtml: `<p>We've moved to our own website, so subscriptions from the old store don't carry over automatically. It takes about a minute to set yours back up, and you'll keep your subscriber discount.</p>
-<p>You were getting <strong>${escapeHtml(legacy.title)}</strong>, ${escapeHtml(INTERVALS[interval].short)}.</p>
-${button("Restart my subscription", url)}
-<p style="font-size:14px;color:#76614A;">Your old subscription on the previous store has been or will be cancelled, so you won't be charged twice. Questions? Just reply.</p>`,
-    }),
-  });
+  const r = await sendInvite(legacy, settings.supportEmail);
   if (!r.ok) flash(PAGE, "error", `Invite not sent: ${r.error}`);
   await saveSettings({ legacyInvitesSent: { ...settings.legacyInvitesSent, [email]: new Date().toISOString() } });
   revalidatePath(PAGE);
-  flash(PAGE, "ok", `Invite sent to ${email}.`);
+  flash(PAGE, "ok", `Approval email sent to ${email}.`);
 }
 
+export async function inviteAllActiveLegacy() {
+  await requireOwner();
+  const settings = await getSettings();
+  const active = (await listLegacySubscribers()).filter((l) => l.active);
+  const sent: Record<string, string> = { ...settings.legacyInvitesSent };
+  const failed: string[] = [];
+  for (const l of active) {
+    const r = await sendInvite(l, settings.supportEmail);
+    if (r.ok) sent[l.email] = new Date().toISOString();
+    else failed.push(l.email);
+  }
+  await saveSettings({ legacyInvitesSent: sent });
+  revalidatePath(PAGE);
+  if (failed.length) flash(PAGE, "error", `Sent ${active.length - failed.length}; failed for ${failed.join(", ")}.`);
+  flash(PAGE, "ok", `Approval emails sent to ${active.length} current Shopify subscriber${active.length === 1 ? "" : "s"}.`);
+}

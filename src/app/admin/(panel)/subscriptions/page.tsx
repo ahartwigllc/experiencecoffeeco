@@ -10,7 +10,7 @@ import { formatCents } from "@/lib/money";
 import { INTERVALS, isInterval, monthlyValueCents } from "@/lib/pricing";
 import { getSettings } from "@/lib/settings";
 import { stripeDashboardUrl } from "@/lib/stripe";
-import { changeSubscription, getLegacySubscribers, inviteLegacySubscriber, syncAllSubscriptions } from "../../actions/subscriptions";
+import { changeSubscription, getLegacySubscribers, inviteAllActiveLegacy, inviteLegacySubscriber, syncAllSubscriptions } from "../../actions/subscriptions";
 
 export default async function SubscriptionsPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   await requireOwner();
@@ -110,43 +110,68 @@ export default async function SubscriptionsPage({ searchParams }: { searchParams
 
       <h2>Subscribers from the old Shopify store</h2>
       <p className="muted small">
-        Found in your imported order history. Their payment details stay with Shopify, so invite each one to restart here (one click
-        for them), then cancel their old Shopify subscription. People drop off this list once they re-subscribe.
+        Their cards stay with Shopify, so each one gets an email with an <strong>Approve my subscription</strong> button. It opens a
+        Stripe checkout already filled in with their coffee, schedule and subscriber price, starting on their next usual date, so they
+        only confirm their card. You get an email when each person approves: cancel their Shopify subscription then. People drop off
+        this list once they&apos;ve moved.
       </p>
+      {legacy.some((l) => l.active) && (
+        <form action={inviteAllActiveLegacy} style={{ margin: "0.5rem 0 1rem" }}>
+          <ConfirmButton message={`Email all ${legacy.filter((l) => l.active).length} current Shopify subscribers an approval link?`}>
+            Email all current subscribers
+          </ConfirmButton>
+        </form>
+      )}
       <div className="table-wrap">
         <table className="data">
           <thead>
             <tr>
               <th>Customer</th>
-              <th>Was getting</th>
+              <th>Getting</th>
               <th>Schedule</th>
-              <th>Last Shopify order</th>
-              <th className="num">Renewals</th>
-              <th>Invite</th>
+              <th>Next Shopify charge</th>
+              <th>Status</th>
+              <th>Approval email</th>
             </tr>
           </thead>
           <tbody>
-            {legacy.map((l) => (
+            {legacy.filter((l) => l.active).map((l) => (
               <tr key={l.email}>
                 <td>{l.name ?? ""}<div className="small muted">{l.email}</div></td>
                 <td>{l.quantity}× {l.title}</td>
                 <td>{isInterval(l.interval) ? INTERVALS[l.interval].label : l.interval}</td>
-                <td>{formatDate(l.last)}</td>
-                <td className="num">{l.count}</td>
+                <td>{formatDate(l.nextDue)}</td>
+                <td><span className="badge amber">still on Shopify</span></td>
                 <td>
                   <form action={inviteLegacySubscriber}>
                     <input type="hidden" name="email" value={l.email} />
                     <button className="btn btn-small btn-ghost" type="submit">
-                      {settings.legacyInvitesSent[l.email] ? `Resend (sent ${formatDate(settings.legacyInvitesSent[l.email])})` : "Send invite"}
+                      {settings.legacyInvitesSent[l.email] ? `Resend (sent ${formatDate(settings.legacyInvitesSent[l.email])})` : "Send"}
                     </button>
                   </form>
                 </td>
               </tr>
             ))}
-            {legacy.length === 0 && <tr><td colSpan={6} className="muted">None left to move. Every former subscriber has re-subscribed, or history hasn't been imported yet.</td></tr>}
+            {!legacy.some((l) => l.active) && <tr><td colSpan={6} className="muted">Everyone current has moved over. You can cancel the Shopify subscription app.</td></tr>}
           </tbody>
         </table>
       </div>
+      {legacy.some((l) => !l.active) && (
+        <details className="small" style={{ marginTop: "0.75rem" }}>
+          <summary>{legacy.filter((l) => !l.active).length} past subscribers who already stopped on Shopify</summary>
+          <ul>
+            {legacy.filter((l) => !l.active).map((l) => (
+              <li key={l.email}>
+                {l.name ?? l.email} ({l.email}): {l.title}, last order {formatDate(l.last)}
+                <form action={inviteLegacySubscriber} style={{ display: "inline", marginLeft: 8 }}>
+                  <input type="hidden" name="email" value={l.email} />
+                  <button className="btn btn-small btn-ghost" type="submit">Invite back</button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
     </>
   );
 }
