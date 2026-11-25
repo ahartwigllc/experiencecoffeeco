@@ -3,7 +3,8 @@ import type { NextConfig } from "next";
 /**
  * Legacy Shopify URLs are redirected permanently so existing links, Google
  * results, and bookmarks keep working after the domain moves off Shopify.
- * Product URLs (/products/<handle>) are kept identical, so they need no redirect.
+ * Product URLs (/products/<handle>) are kept identical, except the Wush Wush handle,
+ * which was renamed from -8oz to -12oz.
  */
 const nextConfig: NextConfig = {
   images: { unoptimized: true },
@@ -21,6 +22,7 @@ const nextConfig: NextConfig = {
       { source: "/policies/refund-policy", destination: "/policies/refunds", permanent: true },
       { source: "/policies/terms-of-service", destination: "/policies/terms", permanent: true },
       { source: "/policies/shipping-policy", destination: "/policies/delivery", permanent: true },
+      { source: "/products/ethiopian-wush-wush-8oz", destination: "/products/ethiopian-wush-wush-12oz", permanent: true },
       { source: "/cart/:path+", destination: "/cart", permanent: false },
     ];
   },
